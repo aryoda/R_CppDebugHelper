@@ -7,13 +7,15 @@ to easily inspect (print) the content of R and [Rcpp](https://github.com/RcppCor
 on the console when debugging C or C++ called called from R.
 This can be done without modifying the source code of the debugged code.
 
+**This package is experimental and meant as a prove of concept**
+
 
 
 # Status
 
 Initiated in Oct, 2019 after some questions and discussions at Stackoverflow regarding debugging of `Rcpp` code with `gdb`
 
-**Currently work in (slow or no ;-) progress...**
+**Currently work in (slow or no ;-) progress... Nothings works. A lot of ideas are collected in the [RESEARCH_NOTES.txt](RESEARCH_NOTES.txt)...**
 
 
 
