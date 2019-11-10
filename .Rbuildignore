@@ -1,0 +1,12 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+# ^NEWS\..*
+^generate_roxygen_doc_without_a_package.R
+^.*\.log$
+R/dump\.frames\.dev\.R
+^\.travis\.yml$
+^codecov\.yml$
+^appveyor\.yml$
+^README\.md$
+^LICENSE_HEADER_TEMPLATE.txt$
+^\.lintr$

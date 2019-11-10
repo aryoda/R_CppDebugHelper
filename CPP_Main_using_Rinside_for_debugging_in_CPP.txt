@@ -1,0 +1,82 @@
+// As my personal habit, I develop and debug pure C++ code first, then integrate with R.
+// Turn the problem into a pure C++ development and debugging task using RInside (a great companion to Rcpp).
+// To debug Rcpp scripts you can create a .cpp application (with a main) that embeds R
+
+// https://stackoverflow.com/questions/4980595/how-to-debug-an-r-package-with-c-code-in-emacs-using-gdb/13266822#13266822
+// http://dirk.eddelbuettel.com/code/rinside.html
+# https://www.gormanalysis.com/blog/using-rcpp-in-xcode/
+# !!! With hints about the required include files:
+# http://www.brianrhall.net/rss/linkingxcodecandrtocreateplots
+
+
+
+#include <Rcpp.h>
+#include <RInside.h>
+#include "function_under_test.h"
+
+int main(int argc, char *argv[])
+{
+    using namespace std;
+    using namespace Rcpp;
+
+    RInside R(argc, argv);
+
+    string evalstr = R"(
+        a <- matrix(c(1,1,1, 1,1,1, 1,1,1), nrow = 3, ncol=3)
+    )";
+    R.parseEvalQ(evalstr);
+
+    SEXP a = R["a"];
+
+    R["b"] = function_under_test(a);
+
+    evalstr = R"(
+        print(b)
+    )";
+    R.parseEvalQ(evalstr);
+
+    return 0;
+}
+
+// ----------------------------------------------------------------------------------
+
+#include <iostream>
+#include <Rcpp.h>
+#include <RInside.h>
+
+using namespace std;
+using namespace Rcpp;
+
+int main(int argc, char** argv) {
+  cout<<"Hello World!"<<endl;
+  RInside R(argc, argv);   // Error disappears if creating an embedded R instance because calling Rcpp functions
+  CharacterVector x = CharacterVector::create( "foo", "bar" ); // problem occurs here
+  cout<<"Done!"<<endl;
+  return 0;
+}
+
+// -------------------------------------------------------------------------------
+// https://www.gormanalysis.com/blog/using-rcpp-in-xcode/
+// http://www.brianrhall.net/rss/linkingxcodecandrtocreateplots
+
+#include <iostream>
+#include <Rcpp.h>
+#include <RInside.h>
+
+int main(int argc, const char * argv[]) {
+
+    // Create an embedded R instance
+    RInside R(argc, argv);
+
+    // Print Hello World to the console using Rcout
+    Rcpp::Rcout << "Hello World!" << std::endl;
+
+    // Make a numeric vector. Then calculate and print the mean
+    Rcpp::NumericVector x = Rcpp::NumericVector::create(1, 2, 3);
+    double y = Rcpp::mean(x);
+    std::cout << "Mean: " << y << std::endl;
+
+    return 0;
+}
+
+

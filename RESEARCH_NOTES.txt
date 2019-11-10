@@ -1,0 +1,337 @@
+Rcpp quick ref
+http://dirk.eddelbuettel.com/code/rcpp/Rcpp-quickref.pdf
+
+Rcpp books
+!!! Rcpp for everyone (2019)
+    https://teuder.github.io/rcpp4everyone_en/
+    https://github.com/teuder/rcpp4everyone_en
+! R packages by Hadley Wickham > Compiled code
+  http://r-pkgs.had.co.nz/src.html
+! Advance R by Hadley >
+  http://adv-r.had.co.nz/Rcpp.html
+
+
+Rcpp tutorials
+! Expose a CPP class to R via Rcpp
+  https://www.gormanalysis.com/blog/exposing-a-cpp-student-class-with-rcpp/
+
+
+
+Debugging Rcpp with gdb on Windows 8 !!!
+http://lists.r-forge.r-project.org/pipermail/rcpp-devel/2014-September/008036.html
+C:\Rtools\gcc-4.6.3\bin64\gdb.exe rgui
+https://stackoverflow.com/questions/53622354/how-to-debug-line-by-line-rcpp-generated-code-in-windows
+https://stackoverflow.com/questions/11345537/debugging-line-by-line-of-rcpp-generated-dll-under-windows
+
+
+Videos:
+
+Using gdb to debug R packages with native code
+https://vimeo.com/11937905
+
+
+
+Debug output of Rcpp types (always working despite template and inline behaviour of C++ compilers)
+- but may crash due to minimal precond checks -
+call Rf_PrintValue(x->data)
+
+
+
+R source code (mirrored):
+https://github.com/wch/r-source/tree/trunk/src/include
+
+
+R Docs:
+https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Handling-R-objects-in-C
+https://cran.r-project.org/doc/manuals/r-release/R-ints.html#R-Internal-Structures
+
+
+
+# Compile flags:
+usethis::edit_r_makevars()
+# Or (one off) Go to the directory ~/.R (a hidden directory with the .).
+# Create a new file called "Makevars" and in it add the line CXXFLAGS=-g -O0 -Wall.
+
+
+
+$ R CMD config CXXFLAGS
+-g -O2 -Wall -pedantic -fstack-protector-strong -D_FORTIFY_SOURCE=2
+CXXFLAGS -g -O0 -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2
+
+# debugging optimized code:
+-ggdb3 -gdwarf-4 -fvar-tracking-assignments -ginline-points -gstatement-frontiers
+Or just
+-g3
+
+# https://stackoverflow.com/questions/30946735/gdb-not-loading-symbols-when-running-standalone-shared-library
+# to export all symbols when compiling use:
+gcc -ggdb3 -O0 -pie
+you also need -rdynamic flag to force exporting all symbols from libdtest1.so
+-shared overrides -pie. Remove -shared
+readelf -d libdtest1.so | grep DEBUG
+the output for a library with debugging symbols contains "(debug) 0x0"
+
+List exported symbols of an ELF shared library:
+readelf -Ws /path/to/libfoo.so
+or (if you have GNU nm)
+nm -D /path/to/libfoo.so
+# readelf -Ws Rcpp.so | grep wrap
+#   3228: 00000000000921ce    34 FUNC    WEAK   DEFAULT   12 _ZN4Rcpp8internal21wrap_dispatch_unknownINS_12RObject_ImplINS_15PreserveStorageEEEEEP7SEXPRECRKT_NS_6traits17integral_constantIbLb1EEE
+
+provides macro information if you are using the DWARF debugging format, and specify the option -g3
+DWARF is currently the most expressive and best supported debugging format in GDB.
+# -gdwarf-3
+# -gdwarf-4
+
+# To avoid inlined functions use:
+-fno-inline
+
+# CFLAGS += -fkeep-inline-functions
+# gcc -fkeep-inline-functions
+
+
+# Sombody said position-independent code shall make templated code available in gdb... Really?:
+-fPIC  # no, does not work (neither with -ggdb nor -gdwarf-4)
+
+
+
+https://stackoverflow.com/questions/24957363/how-to-print-evaluate-c-template-functions-in-gdb
+Without an explicit instance in the source code, the compiler will treat the template code
+as it would "static inline" code and optimize it out if it is unused.
+
+template<typename T>
+T id(T x) {return x;}
+
+template int id<int> (int x);
+
+int main() {
+  int i = 0;
+  i = i + 1;
+}
+
+Within gdb, I place the C++ function (symbol) I want to call within single quotes:
+(gdb) p 'id<int>(int)'(i)
+
+
+
+# GNU GDB documentation:
+https://www.gnu.org/software/gdb/documentation/
+
+set print pretty on
+set print demangle on
+set print asm-demangle on
+# add to ~/.gdbinit
+
+# Use docker for valgrind debugging of memory issues
+https://stackoverflow.com/questions/57360360/having-trouble-debugging-possible-rcpp-memory-leak
+http://dirk.eddelbuettel.com/blog/2019/08/05/#023_rocker_debug_example
+
+
+# !!! Debug Rcpp code in R on Windows (explains how to find and load a dynamically compiled CPP function!!!)
+https://stackoverflow.com/questions/53622354/how-to-debug-line-by-line-rcpp-generated-code-in-windows
+# Same for OS-X
+https://stackoverflow.com/questions/21226337/what-are-productive-ways-to-debug-rcpp-compiled-code-loaded-in-r-on-os-x-maveri?rq=1
+https://www.gormanalysis.com/blog/using-rcpp-in-xcode/
+
+
+
+# R -d gdb --vanilla
+
+# (gdb) run
+
+# library(RcppTestPkg)
+
+# Strg+C
+
+# (gdb) break rcpp_hello_world.cpp:8  # :12
+
+# (gdb) cont
+
+# rcpp_hello_world()
+
+# (gdb) p x
+# $2 = {<Rcpp::PreserveStorage<Rcpp::Vector<16, Rcpp::PreserveStorage> >> = {
+#   data = 0x5555562c4210}, <Rcpp::SlotProxyPolicy<Rcpp::Vector<16, Rcpp::PreserveStorage> >> = {<No data fields>}, <Rcpp::AttributeProxyPolicy<Rcpp::Vector<16, Rcpp::PreserveStorage> >> = {<No data fields>}, <Rcpp::NamesProxyPolicy<Rcpp::Vector<16, Rcpp::PreserveStorage> >> = {<No data fields>}, <Rcpp::RObjectMethods<Rcpp::Vector<16, Rcpp::PreserveStorage> >> = {<No data fields>}, <Rcpp::VectorBase<16, true, Rcpp::Vector<16, Rcpp::PreserveStorage> >> = {<Rcpp::traits::expands_to_logical__impl<16>> = {<No data fields>}, <No data fields>}, cache = {
+#     p = 0x7fffffffba10}}
+
+# (gdb) p R_PV(x)
+# 'R_PV' has unknown return type; cast the call to its declared return type
+# (gdb) call R_PV(wrap(x))
+# Cannot resolve function wrap to any overloaded instance
+# call R_PV(Rcpp::wrap(&x))
+# A syntax error in expression, near `(&x))'.
+# (gdb) call R_PV('Rcpp::wrap'(&x))
+# Cannot resolve function wrap to any overloaded instance
+# (gdb) print x->data
+# $2 = (SEXP) 0x555557332c10
+# (gdb) call R_PV(x->data)
+# (gdb) print R_PV(x->data)
+# $3 = void
+# !!!!!!!
+# (gdb) call print(x->data)
+# [1] "foo" "bar"
+# (gdb) print print(x->data)
+# [1] "foo" "bar"
+# $5 = void
+# (gdb) call Rf_PrintValue(x->data)
+# [1] "foo" "bar"
+# (gdb) call 'Rcpp::wrap<Rcpp::CharacterVector>'(x)
+# No symbol "Rcpp::wrap<Rcpp::CharacterVector>" in current context.
+
+
+
+
+# https://blogs.oracle.com/linux/8-gdb-tricks-you-should-know-v2
+# (gdb) list rcpp_hello_world.cpp
+# (gdb) directory path/to/source/code/files/
+
+
+# Rcpp::wrap() and Rcpp::as():
+# https://github.com/RcppCore/Rcpp/blob/f3c5a34e06e774532227470b01c63a8f08ce4313/inst/include/Rcpp/internal/wrap.h
+# https://stackoverflow.com/questions/58652434/debugging-c-code-of-an-r-package-with-rcpp-using-gdb-cannot-print-variable-val?noredirect=1#comment103836387_58652434
+# https://gallery.rcpp.org/articles/custom-as-and-wrap-example/
+# use as<>() and especially wrap() to create yourself a SEXP
+//conversion from C++to R
+template<typename T> SEXP wrap(const T& object) ;
+//conversion from R to C++
+template<typename T> T as( SEXP x) ;
+
+
+
+# https://stackoverflow.com/questions/22029834/possible-to-call-inline-functions-in-gdb-and-or-emit-them-using-gcc
+# For gdb to support inlined functions, the compiler must record information about inlining in the debug information:
+# -gdwarf-2
+
+# typedefs in Rcpp for xxx-Vectors in instantiation.h:
+#     typedef Vector<REALSXP> NumericVector ;
+#     typedef Vector<STRSXP> CharacterVector ;
+
+# (gdb) call x.at(0)
+# Cannot evaluate function -- may be inlined
+
+#  provide the namespace that the class belongs to within a single quotes
+# (gdb) p ('MyScope::MyClass'*) ptr;
+
+# How to list class methods in gdb?
+# ptype(x)
+
+# Show function signature:
+whatis Rcpp::wrap
+
+# gdb attach fails with ptrace: Operation not permitted
+# -> Ubuntu kernel hardening allows only debugging of child processes:
+# https://wiki.ubuntu.com/SecurityTeam/Roadmap/KernelHardening#ptrace%20Protection
+# To switch this off use:
+# sudo su -
+# echo 0 > /proc/sys/kernel/yama/ptrace_scope
+# exit
+
+# If you ask to print an object whose contents are unknown to GDB, e.g.,
+# because its data type is not completely specified by the debug information,
+# GDB will say ‘<incomplete type>’. See incomplete type, for more about this.
+
+# https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Inspecting-R-objects
+The key to inspecting R objects from compiled code is the function PrintValue(SEXP s)
+which uses the normal R printing mechanisms to print the R object pointed to by s,
+or the safer version R_PV(SEXP s) which will only print ‘objects’.
+...
+Another way is to call R_PV from the symbolic debugger. (PrintValue is hidden as Rf_PrintValue.)
+See source code: https://github.com/wch/r-source/blob/9b732e3338ed0f618ba18d136a68ca68733de3ef/src/main/print.c
+void R_PV(SEXP s)
+{
+    if(isObject(s)) PrintValueEnv(s, R_GlobalEnv);
+}
+=> R_PV ist nur sichtbar in gdb, wenn der Code die R-API benutzt:
+   https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Handling-R-objects-in-C
+   Rinternals.h contains public functions to handle R objects from within C code.
+   Headers are in the directory R_INCLUDE_DIR (default R_HOME/include)
+#include <R.h>
+#include <Rinternals.h>
+
+Oder: Über Rcpp einbinden (RcppCommon.h):
+
+# Rf_PrintValue
+# is declared in the header Rinternals.h that is pulled in by RcppCommon.h that is pulled in by Rcpp.h
+# https://stackoverflow.com/questions/28152406/print-integer-vector-from-rcpp-function
+
+
+(gdb) p R_PV('Rcpp::wrap'(y))
+Cannot resolve function wrap to any overloaded instance
+(gdb) p R_PV(Rcpp::wrap(y))
+A syntax error in expression, near `(y))'.
+(gdb) p 'Rcpp::wrap'(y)
+Cannot resolve function wrap to any overloaded instance
+(gdb) p Rcpp::wrap(y)
+Cannot resolve function wrap to any overloaded instance
+(gdb)
+
+
+
+Access the global environment via Rcpp (code snippet):
+https://gallery.rcpp.org/articles/accessing-environments/
+https://stackoverflow.com/questions/3671862/read-variables-from-global-environment-with-inline-rcpp
+https://teuder.github.io/rcpp4everyone_en/290_environment.html
+
+
+
+# GDB pretty-printers in Python
+https://sourceware.org/gdb/wiki/STLSupport
+https://sourceware.org/gdb/onlinedocs/gdb/Writing-a-Pretty_002dPrinter.html#Writing-a-Pretty_002dPrinter
+    Environment env = Environment::global_env();
+    CharacterVector v = env["stooges"];
+    Rcout << "Stooge Nb 2 is: " << v[1] << std::endl
+    // STL containers should also work:
+    // std::vector<double> vx = env["x"];
+    // return wrap(vx);
+
+
+Print R objects to stderr:
+https://stackoverflow.com/questions/35982284/how-to-print-an-r-object-to-stderr-in-rcpp
+https://stackoverflow.com/questions/51169994/how-to-print-raw-values-in-rcpp
+-> REprintf in R
+# src/include/R_ext/Print.h
+void Rprintf(const char *, ...);
+void REprintf(const char *, ...);
+# r-source/src/main/printutils.c
+-> All printing in R is done via the functions Rprintf and REprintf
+   Rprintf writes to standard output
+   REprintf writes to standard error
+# See also: https://github.com/wch/r-source/blob/trunk/src/main/print.c
+  #include <Rcpp.h>
+  using namespace Rcpp;
+  // [[Rcpp::export]]
+  void test(SEXP key) {
+    CharacterVector key1 = as<CharacterVector>(key);
+    Rcpp::Rcerr << "This does not work: " << key1 << std::endl;
+  }
+  /*** R
+  test(c("x", "y"))
+  test(1:3)
+    */
+
+
+# Print helper function to print raw values
+  void printVector(IntegerVector v) { print(v); }
+  void printVector2(IntegerVector v) { Rcpp::Rcout << v << std::endl; }
+https://stackoverflow.com/questions/51169994/how-to-print-raw-values-in-rcpp
+  // [[Rcpp::export]]
+  void print_raw(RawVector x) {
+    for (int v : x) {
+      Rcout << std::hex << std::setw(2) << std::setfill('0') << v << ' ';
+    }
+    Rcout << '\n';
+  }
+# or
+  #include <Rcpp.h>
+  using namespace Rcpp;
+
+  // [[Rcpp::export]]
+  void print_raw(RawVector x) {
+    print(x);
+  }
+
+  /*** R
+  x <- as.raw(0:10)
+  print(x)
+  print_raw(x)
+  */
