@@ -10,3 +10,4 @@ R/dump\.frames\.dev\.R
 ^README\.md$
 ^LICENSE_HEADER_TEMPLATE.txt$
 ^\.lintr$
+^.*\.txt

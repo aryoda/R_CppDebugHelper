@@ -51,6 +51,10 @@ https://cran.r-project.org/doc/manuals/r-release/R-ints.html#R-Internal-Structur
 usethis::edit_r_makevars()
 # Or (one off) Go to the directory ~/.R (a hidden directory with the .).
 # Create a new file called "Makevars" and in it add the line CXXFLAGS=-g -O0 -Wall.
+#
+# Folder:
+# HOME/.R/Makevars-R_PLATFORM (but HOME/.R/Makevars.win or HOME/.R/Makevars.win64 on Windows),
+# or if that does not exist, HOME/.R/Makevars, where ‘R_PLATFORM’ is the platform for which R was built
 
 
 

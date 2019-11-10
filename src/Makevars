@@ -1,9 +1,19 @@
 # See /etc/R/Makeconf
 #
+# When a package is installed using R CMD INSTALL, make is used to control compilation and linking
+# into a shared object for loading into R.
+# There are default make variables and rules for this
+# (determined when R is configured and recorded in R_HOME/etcR_ARCH/Makeconf).
+#
+# There are platform-specific file names on Windows: src/Makevars.win takes precedence over src/Makevars
+# and src/Makefile.win must be used.
+#
+# Do only set PKG_ variables, do not set variables such as CPPFLAGS, CFLAGS!
+#
 # Package-local Makevars
 # https://cran.r-project.org/doc/manuals/R-exts.html#Creating-shared-objects
 # https://cran.r-project.org/doc/manuals/R-admin.html#Customizing-package-compilation
-PKG_CXXFLAGS = -g3 -O0 -Wall
+PKG_CXXFLAGS = -g3     # -O0 -Wall   is GCC specific an cannot be used on all platforms
 
 # Flags that are already set can be overridden by the environment variable MAKEFLAGS
 # MAKEFLAGS="CXXFLAGS = -g3 -O3"   # does not work
