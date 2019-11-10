@@ -1,12 +1,12 @@
-// As my personal habit, I develop and debug pure C++ code first, then integrate with R.
+// "As my personal habit, I develop and debug pure C++ code first, then integrate with R.
 // Turn the problem into a pure C++ development and debugging task using RInside (a great companion to Rcpp).
-// To debug Rcpp scripts you can create a .cpp application (with a main) that embeds R
+// To debug Rcpp scripts you can create a .cpp application (with a main) that embeds R."
 
 // https://stackoverflow.com/questions/4980595/how-to-debug-an-r-package-with-c-code-in-emacs-using-gdb/13266822#13266822
 // http://dirk.eddelbuettel.com/code/rinside.html
-# https://www.gormanalysis.com/blog/using-rcpp-in-xcode/
-# !!! With hints about the required include files:
-# http://www.brianrhall.net/rss/linkingxcodecandrtocreateplots
+// https://www.gormanalysis.com/blog/using-rcpp-in-xcode/
+// !!! With hints about the required include files:
+// http://www.brianrhall.net/rss/linkingxcodecandrtocreateplots
 
 
 
