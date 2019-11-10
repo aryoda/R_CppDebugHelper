@@ -19,8 +19,19 @@ Initiated in Oct, 2019 after some questions and discussions at Stackoverflow reg
 
 # Background
 
-Debugging C and C++ code called from R is pain because it is difficult to
-inspect the 
+Debugging C and C++ code called from R using a debugger like `gdb` is often a pain because it is difficult to
+inspect the R and `Rcpp` specific data types (like variables or environments) with a debugger that
+does not know the internals of these data types.
+
+This package is an attempt to improve this situation.
+
+
+# Expected deliverables
+
+1. An R package that offers low-level C/C++ functions to painlessly inspect R/Rcpp specific data types from a debugger
+2. Document the options you have to debug
+3. Provide a tutorial using `gdb` (incl. test functions to learn debugging)
+
 
 
 
