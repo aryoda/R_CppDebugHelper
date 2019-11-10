@@ -5,19 +5,19 @@
 
 using namespace Rcpp;
 
-// rcpp_hello_world
-List rcpp_hello_world();
-RcppExport SEXP _CppDebugHelper_rcpp_hello_world() {
+// rcpp_example_simple
+List rcpp_example_simple();
+RcppExport SEXP _CppDebugHelper_rcpp_example_simple() {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(rcpp_hello_world());
+    rcpp_result_gen = Rcpp::wrap(rcpp_example_simple());
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_CppDebugHelper_rcpp_hello_world", (DL_FUNC) &_CppDebugHelper_rcpp_hello_world, 0},
+    {"_CppDebugHelper_rcpp_example_simple", (DL_FUNC) &_CppDebugHelper_rcpp_example_simple, 0},
     {NULL, NULL, 0}
 };
 
