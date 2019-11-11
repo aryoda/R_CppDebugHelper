@@ -38,7 +38,7 @@ This package is an attempt to improve this situation.
 
 ## Planned debugging API functions
 
-Off public C/C++-level functions to
+Offer public C/C++-level functions to
 
 - inspect Rcpp's *Vector, *Matrix and List data types
 - inspect SEXP types (native R)
