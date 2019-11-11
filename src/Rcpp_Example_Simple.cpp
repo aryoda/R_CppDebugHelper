@@ -4,6 +4,7 @@
 
 using namespace Rcpp;
 
+//' @export
 // [[Rcpp::export]]
 List rcpp_example_simple() {
 
