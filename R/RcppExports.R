@@ -2,7 +2,7 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #' @export
-rcpp_example_simple <- function() {
-    .Call('_CppDebugHelper_rcpp_example_simple', PACKAGE = 'CppDebugHelper')
+debug_example_rcpp <- function() {
+    .Call('_CppDebugHelper_debug_example_rcpp', PACKAGE = 'CppDebugHelper')
 }
 
