@@ -106,8 +106,17 @@ void dbg_print(Environment e) {
 
 void dbg_attributes(RObject o) {
   // wrap() from std::vector<std::string>
-  CharacterVector attr_names = wrap(o.attributeNames());
-  Rcpp::print(attr_names);
+  // CharacterVector attr_names = wrap(o.attributeNames());
+  auto  attr_names = o.attributeNames();
+  // Rcpp::print(attr_names);
+
+  // Print names + values in the same format as R
+  auto i = attr_names.size();  // workaround to get the right size type without thinking
+  for(i=0; i < attr_names.size(); i++) {
+    Rcpp::Rcout << "$" << attr_names[i] << std::endl;
+    Rcpp::print(o.attr(attr_names[i]));
+    Rcpp::Rcout << std::endl;
+  }
 }
 
 void dbg_attributes(ComplexVector df) {

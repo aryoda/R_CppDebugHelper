@@ -157,6 +157,8 @@ Offer public C/C++-level functions to
 - NA value diagnostics
 - optional: change R variable values
 - optional: change Rcpp variable values
+- each print function should respect `getOption("max.print")` and cut the output
+  with `[ reached getOption("max.print") -- omitted 9000 entries ]`
 
 
 
