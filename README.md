@@ -286,7 +286,7 @@ R -d gdb --debugger-args=--quiet
 
 ## How can I use the debugging helper functions in `gdb` directly without R?
 
-The easiest way to load the debugging helper functions is via R`s `library(CppDebugHelper)` command
+The easiest way to load the debugging helper functions is via R's `library(CppDebugHelper)` command
 but if you want to debug an application that does use R directly you
 can load the underlying shared library using the `LD_PRELOAD` environment variable:
 
