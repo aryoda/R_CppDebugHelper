@@ -22,6 +22,8 @@ using namespace Rcpp;
 
 // Prints the content of an SEXP.
 void dbg_print(SEXP x) {
+  if (x == NULL)
+    return;
   Rcpp::print(x);
 }
 
@@ -33,12 +35,18 @@ void dbg_ls() {
   print(e.ls(false));
 }
 
-// Prints all variable names in the global environment incl. the hidden variables (starting with a dot).
+// Prints all variable names in the global environment
+// incl. the hidden variables (starting with a dot) if all_names = 1.
 // R command: ls(all.names = TRUE)
 void dbg_ls(bool all_names) {
   Environment e = Rcpp::Environment::global_env();
   print(e.ls(all_names));
 }
+
+
+
+// Other "dbg_ls" functions are defined in the Rcpp related source file(s), eg. for passing Rcpp::Environment
+
 
 
 
@@ -57,13 +65,57 @@ void dbg_ls(bool all_names) {
 // an Rcpp function to query R variables by their name...
 // https://stackoverflow.com/questions/42462860/calling-stdbasic-string-in-gdb?noredirect=1&lq=1
 void dbg_print(const char *name) {
+  if (name == NULL)
+    return;
   std::string varname(name);
-  Symbol sym(name);
+  if (varname.size() < 1)   // size in bytes (not chars)!
+    return;
+  // Symbol sym(name);
   // Rcpp::Rcout << name << std::endl;
   // std::cout << "name: " << varname << std::endl;
   Environment e = Rcpp::Environment::global_env();
-  print(e.get(name));
+  // print(e.get(name));
+  print(e.find(varname)); // find instead of get to search parent environments too
 }
 
 
 
+
+
+// dbg_str -----------------------------------------------------
+
+// Print structure of an variable in the global env (like R's "str")
+void dbg_str(const char *name) {
+  if (name == NULL)   // TODO reliable way to detect empty strings
+    return;
+  try {
+    std::string varname(name);
+    if (varname.size() < 1)   // size in bytes (not chars)!
+      return;
+    Environment e = Rcpp::Environment::global_env();
+    RObject o = e.find(varname);
+    Function f = e.find("str");  // should be in "namespace:utils"
+    // Rcpp::print(f);
+    f(o);  // does print via R
+  } catch(std::exception& ex) {
+    Rcpp::Rcout << ex.what() << std::endl;
+  } catch(...) {
+    Rcpp::Rcout << "Unknown error" << std::endl;
+  }
+}
+
+
+// Print structure of an object (like R's "str")
+void dbg_str(SEXP x) {
+  if (x == NULL)
+    return;
+  try {
+      Function f = Environment::global_env().find("str");  // should be in "namespace:utils"
+      // Rcpp::print(f);
+      f(x);  // does print via R
+    } catch(std::exception& ex) {
+      Rcpp::Rcout << ex.what() << std::endl;
+    } catch(...) {
+      Rcpp::Rcout << "Unknown error" << std::endl;
+  }
+}

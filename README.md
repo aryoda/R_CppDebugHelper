@@ -27,6 +27,11 @@ does not know the internals of these data types.
 
 This package is an attempt to improve this situation.
 
+TODO
+
+- Show problems and solutions (offered by this package) as table
+- Explain the reasons for the problems
+
 
 
 # Goals
@@ -128,7 +133,7 @@ devtools::install_github("aryoda/CppDebugHelper")
 
 1. An R package that offers low-level C/C++ functions to painlessly inspect R/Rcpp specific data types from a debugger
 2. Document the options you have to debug
-3. Provide a tutorial using `gdb` (incl. test functions to learn debugging)
+3. Provide a tutorial using `gdb` (incl. test functions as a separate R package to learn debugging)
 
 
 
@@ -136,26 +141,27 @@ devtools::install_github("aryoda/CppDebugHelper")
 
 Offer public C/C++-level functions to
 
-- inspect Rcpp's *Vector, *Matrix and List data types
-- inspect SEXP types (native R)
-- inspect `data.frame`s (eg. via something like `head` to print the first and last n rows)
-- support simple attribute queries like
-  - inspect all attributes
+- WIP (`dbg_print`): inspect Rcpp's *Vector, *Matrix and List data types
+- DONE (`dbg_print`): inspect SEXP types (native R)
+- DONE (`dbg_print(Environment, varname)`): inspect a variable by name (along the search path)
+- WIP (`dbg_print`): inspect `data.frame`s (eg. via something like `head` to print the first and last n rows)
+- WIP (`dbg_attributes`): support simple attribute queries like
+  - DONE: inspect all attributes
   - inspect a single attribute
-- list all variables in an environment (default: global)
-- inspect R variable in an environment (default: global)
-- list the `search()` path as basis to get the i-th environment
-- inspect a variable by name (along the search path)
+    - convenience function for the class attribute
+    - names of an R object (`names` attribute?)
+- DONE (`dbg_ls`): list all variables in an environment (default: global)
+- DONE (`dbg_ls`): inspect R variable in an environment (default: global)
 - simple vector filtering for important R and Rcpp data types (element range with range checks)
 - common STL containers (but gdb offers pretty printers for that AFAIK) 
-- inspect the `str()` of an R variable
-- inspect the `str()` of Rcpp data types
-- summarize vector
+- DONE (`dbg_str`): inspect the `str()` of an R variable
+- WIP (`dbg_str`): inspect the `str()` of Rcpp data types
+- summarize vector (like `summary` in R; Rcpp knows "only" `table`)
 - tabulation (`table` in R) with limited output (may be quite chatty)
-- names of an R object
 - `head` and `tail`
 - NA value diagnostics
-- optional: change R variable values
+- print encoding of strings and string vectors
+- optional: change R variable values (eg. via an overloaded function names `dbg_assign()`)
 - optional: change Rcpp variable values
 - each print function should respect `getOption("max.print")` and cut the output
   with `[ reached getOption("max.print") -- omitted 9000 entries ]`
@@ -184,31 +190,59 @@ General prerequisites
 
 - GDB can only debug C++ code if you use the proper compiler and the [proper debug format](https://sourceware.org/gdb/onlinedocs/gdb/C-Plus-Plus-Expressions.html) (DWARF is preferred).
 
-A debugger is no compiler so `you`gdb` cannot
+A debugger is no compiler so `gdb` cannot
 
 - bring back optimized code in a more logical structure to debug it
 - undo function inlining
-- call code for templated functions that the compiler has not instantiated (since not needed)
-- instantiate a simple thing like strings (without complex steps to allocate memory and write the string into it)
-  to be used to call a function which requires a string.
-  - Because an std::string is not a primitive data type, it cannot be changed using `(gdb) set var myvar="asdf"`
+- handle expressions that perform overload resolution in expressions involving
+  - user-defined type conversions
+  - calls to constructors or
+  - instantiations of templates that do not exist in the program.
+- instantiate a "simple"" thing like a string (without complex steps to allocate memory and write the string into it)
   - See
     - https://stackoverflow.com/questions/7429462/creating-c-string-in-gdb
     - https://stackoverflow.com/questions/42462860/calling-stdbasic-string-in-gdb?noredirect=1&lq=1
     - https://www.toptip.ca/2013/04/change-value-of-stdstring-in-gdb.html
     - https://stackoverflow.com/questions/2502314/setting-an-stdstring-variable-value-from-gdb
     - https://stackoverflow.com/questions/54240951/how-to-change-the-c-string-value-in-eclipse-debugger?noredirect=1&lq=1
-- perform overload resolution in expressions involving user-defined type conversions, calls to constructors, or instantiations of templates that do not exist in the program.
+  - Note: Because a `std::string` is not a primitive data type, it cannot be changed using `(gdb) set var myvar="asdf"`
+    but by calling its `assign` member function.
 - handle ellipsis argument lists in expressions
+  - https://stackoverflow.com/a/58867535/4468078
 - handle default arguments
-
+  - https://stackoverflow.com/a/58867535
 
 See the [gdb documentation of C++ Expressions](https://sourceware.org/gdb/onlinedocs/gdb/C-Plus-Plus-Expressions.html)
 for what is possible and which limitations apply:
 
 
-Limitations of `gdb` paired with `R` or `Rcpp` API:
 
+Limitations of `gdb` regarding the `R` and `Rcpp` API:
+
+- You can call most of the `dbg_*` functions only from within your C/C++ code (when a breakpoint is hit)
+  but not by interrupting the R main loop (pressing Strg+C at the R command prompt) since this leads
+  to strange `gdb` error messages when doing `(gdb) call dbg_ls()` or `(gdb) call dbg_str("myVar")` for example.
+- Local R/Rcpp variables exist and can be used to call `dbg_*` functions **before** they are initialized.
+  This may cause segfaults (of course):
+  
+  ```
+  (gdb) n
+  19	    Environment e = Rcpp::Environment::global_env();
+  (gdb) p e
+  $7 = {
+    <Rcpp::PreserveStorage<Rcpp::Environment_Impl<Rcpp::PreserveStorage> >> = {
+      data = 0x7fffffffb940 }, 
+    <Rcpp::SlotProxyPolicy<Rcpp::Environment_Impl<Rcpp::PreserveStorage> >> = {<No data fields>}, 
+    <Rcpp::AttributeProxyPolicy<Rcpp::Environment_Impl<Rcpp::PreserveStorage> >> = {<No data fields>}, 
+    <Rcpp::RObjectMethods<Rcpp::Environment_Impl<Rcpp::PreserveStorage> >> = {<No data fields>}, 
+    <Rcpp::BindingPolicy<Rcpp::Environment_Impl<Rcpp::PreserveStorage> >> = {<No data fields>}, <No data fields>}
+  (gdb) call dbg_print(e)
+  8
+  Program received signal SIGSEGV, Segmentation fault.
+  0x00007ffff7836a80 in getAttrib0 (vec=0x7fffffffb940, name=0x55555576c9a8) at attrib.c:142
+  ...
+  ```
+  
 - `gdb` does not apply pagination for `Rcpp::print()` output
 - `gdb`'s `display` command does not work with call (`display call f()` is not allowed)
   so printing each time the program stops into `gdb` does not work
@@ -250,6 +284,34 @@ R -d gdb --debugger-args=--quiet
 ```
 
 
+## How can I use the debugging helper functions in `gdb` directly without R?
+
+The easiest way to load the debugging helper functions is via R`s `library(CppDebugHelper)` command
+but if you want to debug an application that does use R directly you
+can load the underlying shared library using the `LD_PRELOAD` environment variable:
+
+```
+gdb myApp
+(gdb) set environment LD_PRELOAD ./CppDebugHelper.so
+(gdb) run
+(gdb) # Press Ctrl+C to break R into gdb
+(gdb) # verify that the library has been loaded by gdb
+(gdb) info sharedlibrary 
+From                To                  Syms Read   Shared Object Library
+0x00007ffff7bbc040  0x00007ffff7bca2e0  Yes         ./CppDebugHelper.so
+...
+(gdb) # The debug functions are now available, eg.
+(gdb) ptype dbg_as_std_string("hello world")
+```
+
+See:
+
+- [Load an additional shared library in gdb to inject debugging helper functions](https://stackoverflow.com/q/58888795)
+- [How to use gdb with LD_PRELOAD](https://stackoverflow.com/q/10448254)
+- [What is the LD_PRELOAD trick?](https://stackoverflow.com/questions/426230/what-is-the-ld-preload-trick)
+- [What is preloading?](https://blog.cryptomilk.org/2014/07/21/what-is-preloading/)
+
+
 
 # License
 
@@ -260,6 +322,7 @@ GPL-3 (see file [LICENSE](LICENSE))
 # Links
 
 - [gdb documentation](https://sourceware.org/gdb/onlinedocs/gdb)
+- TODO Links to gdb tutorials + cheat sheets
 - [Rcpp source code](https://github.com/RcppCore/Rcpp)
 - [Good introduction into `Rcpp`](https://teuder.github.io/rcpp4everyone_en)
 - `gdb` does not know default arguments:
@@ -270,3 +333,4 @@ GPL-3 (see file [LICENSE](LICENSE))
 - [R for Windows FAQ](https://cran.r-project.org/bin/windows/base/rw-FAQ.html)
   - see esp. the section *How do I debug code that I have compiled and dyn.load-ed?* 
 - [R Internals](https://cran.r-project.org/doc/manuals/r-release/R-ints.html)
+

@@ -347,3 +347,12 @@ https://stackoverflow.com/questions/51169994/how-to-print-raw-values-in-rcpp
   print(x)
   print_raw(x)
   */
+
+
+# https://stackoverflow.com/questions/7429462/creating-c-string-in-gdb
+(gdb) call malloc(sizeof(std::string))
+$1 = (void *) 0x91a6a0
+(gdb) call ((std::string*)0x91a6a0)->basic_string()
+(gdb) call ((std::string*)0x91a6a0)->assign("Hello, World")
+$2 = (std::basic_string<char, std::char_traits<char>, std::allocator<char> > &) @0x91a6a0: {static npos = <optimized out>, _M_dataplus = {<std::allocator<char>> = {<__gnu_cxx::new_allocator<char>> = {<No data fields>}, <No data fields>}, _M_p = 0x91a6f8 "Hello, World"}}
+(gdb) call SomeFunctionThatTakesAConstStringRef(*(const std::string*)0x91a6a0)

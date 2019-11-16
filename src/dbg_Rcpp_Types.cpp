@@ -79,23 +79,36 @@ void dbg_print(DataFrame df) {
   Rcpp::print(df);
 }
 
+// Print the variable of an environment. Also searches the parent environments for the variable
+void dbg_print(Environment e, const char *name) {
+  if (name == NULL)
+    return;
+  std::string varname(name);
+  if (varname.size() < 1)   // size in bytes (not chars)!
+    return;
+  print(e.find(varname)); // find instead of get to search parent environments too
+}
 
-// Prints all variable names in the global environment without the hidden variables (starting with a dot).
+
+
+// Prints all variable names of an environment without the hidden variables (starting with a dot).
 // R command: ls(all.names = TRUE)
 void dbg_ls(Environment e) {
   bool all_names = false;
-  print(e.ls(all_names));
+  // TODO segfault if e is not yet initialized (eg. if it is a local variable and used before init)
+  // Rcpp::Rcout << "SEXP type: " << e.sexp_type() << std::endl;
+  Rcpp::print(e.ls(all_names));
 }
 
 
-// Prints all variable names in the global environment incl. the hidden variables (starting with a dot).
+// Prints all variable names of an environment
+// incl. the hidden variables (starting with a dot) if all_names = 1.
 // R command: ls(all.names = TRUE)
 void dbg_ls(Environment e, bool all_names) {
-  print(e.ls(all_names));
+  Rcpp::print(e.ls(all_names));
 }
 
-
-// Print all public variables
+// Print all public variables of an environment (= dbg_ls)
 void dbg_print(Environment e) {
   dbg_ls(e);   // print(e.ls(false));
 }
@@ -107,7 +120,7 @@ void dbg_print(Environment e) {
 void dbg_attributes(RObject o) {
   // wrap() from std::vector<std::string>
   // CharacterVector attr_names = wrap(o.attributeNames());
-  auto  attr_names = o.attributeNames();
+  auto attr_names = o.attributeNames();
   // Rcpp::print(attr_names);
 
   // Print names + values in the same format as R
@@ -118,6 +131,26 @@ void dbg_attributes(RObject o) {
     Rcpp::Rcout << std::endl;
   }
 }
+
+// Print the attributes of a variable in an environment (also searches parent environments for the variable)
+void dbg_attributes(Environment e, const char *name) {
+  if (name == NULL)
+    return;
+  std::string varname(name);
+  if (varname.size() < 1)   // size in bytes (not chars)!
+    return;
+  // Symbol sym(name);
+  RObject o = as<RObject>(e.find(varname));  // find instead of get to search parent environments too
+  dbg_attributes(o);
+}
+
+// Print the attributes of a variable in the global environment.
+// name = name of the variable
+void dbg_attributes(const char *name) {
+  Environment e = Rcpp::Environment::global_env();
+  dbg_attributes(e, name);
+}
+
 
 void dbg_attributes(ComplexVector df) {
   RObject o = df;
@@ -139,6 +172,7 @@ void dbg_attributes(NumericVector df) {
   dbg_attributes(o);
 }
 
+// charToRaw("hello world")
 void dbg_attributes(RawVector df) {
   RObject o = df;
   dbg_attributes(o);
@@ -166,12 +200,52 @@ void dbg_attributes(DataFrame df) {
 
 
 
+// dbg_str -----------------------------------------------------
+
+
+// Print structure of an variable in the global env (like R's "str")
+void dbg_str(Environment e, const char *name) {
+  if (name == NULL)   // TODO reliable way to detect empty strings
+    return;
+  try {
+    std::string varname(name);
+    if (varname.size() < 1)   // size in bytes (not chars)!
+      return;
+    RObject o = e.find(varname); // find instead of get to search parent environments too
+    Function f = e.find("str");  // should be in "namespace:utils"
+    // Rcpp::print(f);
+    f(o);  // does print via R
+  } catch(std::exception& ex) {
+    Rcpp::Rcout << ex.what() << std::endl;
+  } catch(...) {
+    Rcpp::Rcout << "Unknown error" << std::endl;
+  }
+}
+
+
+// Print structure of an object (like R's "str")
+void dbg_str(DataFrame df) {
+  Function f = Environment::global_env().find("str");  // should be in "namespace:utils"
+  // Rcpp::print(f);
+  f(df);  // does print via R
+}
+
+
+// TODO dbg_str for other Rcpp types (not that important as data.frame at the moment ;-)
+//      x->data is always a workaround (= using the underlying SEXP)
+
+
+
 // Rcpp primitives --------------------------------------------
 
-void dbg_print(String x) {
-  // TODO avoid NULL pointer crashes ;-)
+// print the value of the string
+void dbg_print(Rcpp::String x) {
+  if (x == NULL || x.get_sexp() == NULL )   // TODO avoid NULL pointer crashes ;-)
+    return;
   Rcpp::print(x.get_sexp());  // "print" does not directly work on String (no casting possible)
 }
+
+
 
 // TODO
 
