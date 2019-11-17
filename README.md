@@ -58,6 +58,54 @@ Non-functional requirements:
       of forcing the user to find the right function name by knowing the data type
 
 
+# Functions and supported data types
+
+You can call the debug functions `dbg_*` in `gdb` via the `call` command, eg.
+
+```
+(gdb) call dbg_ls()
+(gdb) call dbg_str("myVar_in_global_env")
+(gdb) call dbg_attributes(x)
+(gdb) call dbg_print(x)
+(gdb) call dbg_print(dbg_table(y))
+...
+```
+
+The supported combination of functions and the data type of the first argument are marked with an `x` in the cell.
+
+For non-obvious cases the meaning of the first argument for the function is described in the cell.
+
+The last column (`...`) contains names of functions specialized for the data type.
+
+
+| Data Type        | dbg_ls()     | dbg_str()              | dbg_print()         | dbg_attributes() | dbg_table()              | dbg_get()     | dbg_subset()           | ... |
+|------------------|:------------:|:----------------------:|:-------------------:|:----------------:|:------------------------:|:-------------:|:----------------------:|:---:|
+| Description      | List objects | Print object structure | Print object value  | Print attributes | Return contingency table | Return object | Return filtered object |     |
+| R function       | `ls()`       | `str()`                | `print()`           | `attributes()`   | `table()`                | `get()`       | `myVar[begin:end]`     |     |
+| char *           | x            | x                      | object name (in global env) | object name (in global env) |                        | object name (in global env) |    |     |
+| std::string      |              |                        |                     |                  |                          |               |                        |     |
+| Rcpp::String     |              |                        | prints the string content |            |                          |               |                        |     |
+| SEXP             |              | x                      |  x                  |  x                | x                       |               |                        |     |
+| Environment      | x            |                        | prints names of all objects in the env | prints attributes of an object in the env | env to search a named object     | | | |
+| ComplexVector    |              | x                      |  x                  |  x               |                          |               |                        |     |
+| DataFrame        |              | x                      |  x                  |  x               |                          |               |                        |     |
+| IntegerVector    |              | x                      |  x                  |  x               |                          |               |                        |     |
+| LogicalVector    |              | x                      |  x                  |  x               |                          |               |                        |     |
+| NumericVector    |              | x                      |  x                  |  x               | x                        |               |                        |     |
+| DoubleVector     |              | x                      |  x                  |  x               |                          |               |                        |     |
+| RawVector        |              | x                      |  x                  |  x               |                          |               |                        |     |
+| CharacterVector  |              | x                      |  x                  |  x               |                          |               |                        |     |
+| StringVector     |              | x                      |  x                  |  x               |                          |               |                        |     |
+| GenericVector    |              | x                      |  x                  |  x               |                          |               |                        |     |
+| ExpressionVector |              | x                      |  x                  |  x               |                          |               |                        |     |
+| Rcpp::List       |              | x                      |  x                  |  x               |                          |               |                        |     |
+| DateVector       |              | x                      |  x                  |  x               |                          |               |                        |     |
+| DatetimeVector   |              | x                      |  x                  |  x               |                          |               |                        |     |
+| ... Matrices...  |              |                        |                     |                  |                          |               |                        |     |
+
+*Note: This table was created using http://www.tablesgenerator.com/markdown_tables*
+
+
 
 # Getting started 
 
@@ -152,19 +200,23 @@ Offer public C/C++-level functions to
     - names of an R object (`names` attribute?)
 - DONE (`dbg_ls`): list all variables in an environment (default: global)
 - DONE (`dbg_ls`): inspect R variable in an environment (default: global)
-- simple vector filtering for important R and Rcpp data types (element range with range checks)
+- TODO (`dbg_subset`): simple vector filtering for important R and Rcpp data types (element range with range checks) (idea: as piped functions)
 - common STL containers (but gdb offers pretty printers for that AFAIK) 
 - DONE (`dbg_str`): inspect the `str()` of an R variable
 - WIP (`dbg_str`): inspect the `str()` of Rcpp data types
-- summarize vector (like `summary` in R; Rcpp knows "only" `table`)
-- tabulation (`table` in R) with limited output (may be quite chatty)
-- `head` and `tail`
+- summarize vector (like `summary` in R; Rcpp knows "only" `table`) (idea: as piped functions)
+- WIP (`dbg_table`) tabulation (`table` in R) with limited output (may be quite chatty)
+- `head` and `tail` (idea: as piped functions)
 - NA value diagnostics
 - print encoding of strings and string vectors
 - optional: change R variable values (eg. via an overloaded function names `dbg_assign()`)
 - optional: change Rcpp variable values
-- each print function should respect `getOption("max.print")` and cut the output
-  with `[ reached getOption("max.print") -- omitted 9000 entries ]`
+- optional: `get` function that returns a variable from an environment to be used for filtering
+- optional: support for data types of packages derived from `Rcpp` (eg. ` RcppArmadillo`)
+- optional: show how to use logging in Rcpp code that is synchronised with logging in R (hopefully even the same logging package)
+
+**Note:** Each print function should respect `getOption("max.print")` and cut the output
+with `[ reached getOption("max.print") -- omitted 9000 entries ]`
 
 
 
@@ -186,11 +238,13 @@ TODO
 
 ## Known limitations
 
-General prerequisites
+### General prerequisites
 
 - GDB can only debug C++ code if you use the proper compiler and the [proper debug format](https://sourceware.org/gdb/onlinedocs/gdb/C-Plus-Plus-Expressions.html) (DWARF is preferred).
 
-A debugger is no compiler so `gdb` cannot
+### A debugger is no compiler
+
+So `gdb` cannot
 
 - bring back optimized code in a more logical structure to debug it
 - undo function inlining
@@ -217,7 +271,7 @@ for what is possible and which limitations apply:
 
 
 
-Limitations of `gdb` regarding the `R` and `Rcpp` API:
+### Limitations of `gdb` regarding the `R` and `Rcpp` API
 
 - You can call most of the `dbg_*` functions only from within your C/C++ code (when a breakpoint is hit)
   but not by interrupting the R main loop (pressing Strg+C at the R command prompt) since this leads
@@ -325,6 +379,8 @@ GPL-3 (see file [LICENSE](LICENSE))
 - TODO Links to gdb tutorials + cheat sheets
 - [Rcpp source code](https://github.com/RcppCore/Rcpp)
 - [Good introduction into `Rcpp`](https://teuder.github.io/rcpp4everyone_en)
+- [Rcpp Gallery: Working with Rcpp StringVector](https://gallery.rcpp.org/articles/working-with-Rcpp-StringVector/)
+- [Table: Correspondance of data types between R, Rcpp an dC++](https://teuder.github.io/rcpp4everyone_en/070_data_types.html)
 - `gdb` does not know default arguments:
   - https://stackoverflow.com/questions/58827121/how-to-use-c-default-arguments-in-the-call-command-of-gdb?noredirect=1#comment103957145_58827121
   - https://sourceware.org/gdb/onlinedocs/gdb/C-Plus-Plus-Expressions.html

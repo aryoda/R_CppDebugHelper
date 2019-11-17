@@ -8,11 +8,17 @@ using namespace Rcpp;
 // [[Rcpp::export]]
 List debug_example_rcpp() {
 
-    CharacterVector x    = CharacterVector::create( "foo", "bar" )  ;
-    NumericVector y      = NumericVector::create( 0.0, 1.0 ) ;
+    CharacterVector x    = CharacterVector::create("foo", "bar", NA_STRING, "hello")  ;
+    NumericVector y      = NumericVector::create(0.0, 1.0, NA_REAL, 10) ;
     DataFrame df         = DataFrame::create(Named("name1") = x, _["value1"] = y);  // Named and _[] are the same
     CharacterVector col1 = df["name1"];          // get the first column
     String s             = col1[0];              // element #1
+    // HACK Internally it is a NumericVector so I pass date integers (number of days since 1970-01-01)
+    DateVector d         = DateVector::create( 14974, 14975, 15123, NA_REAL); // TODO how to use real dates instead?
+    DateVector d2        = DateVector::create(Date("2010-12-31"), Date("01.01.2011", "%d.%m.%Y"), Date(2011, 05, 29), NA_REAL);
+    // DateVector d3 = DateVector::create("2010-12-31", "2011-01-01", "2011-05-29");  // compiler error
+    // Datetime(const std::string &s, const std::string &fmt="%Y-%m-%d %H:%M:%OS");
+    DatetimeVector dt    = DatetimeVector::create(1293753600, Datetime("2011-01-01"), Datetime("2011-05-29 10:15:30"), NA_REAL);
 
     List z               = List::create(x, y, df, s);
 

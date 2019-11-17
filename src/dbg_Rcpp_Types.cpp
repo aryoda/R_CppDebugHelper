@@ -11,6 +11,8 @@ using namespace Rcpp;
 
 
 
+// Taken from Rcpp's instantiation.h
+//
 // typedef Vector<CPLXSXP> ComplexVector ;
 // typedef Vector<INTSXP> IntegerVector ;
 // typedef Vector<LGLSXP> LogicalVector ;
@@ -23,6 +25,8 @@ using namespace Rcpp;
 // typedef Vector<VECSXP> GenericVector ;
 // typedef Vector<VECSXP> List ;
 // typedef Vector<EXPRSXP> ExpressionVector ;
+
+// TODO Functions for DateVector and DatetimeVector are still missing?
 
 
 
@@ -86,6 +90,7 @@ void dbg_print(Environment e, const char *name) {
   std::string varname(name);
   if (varname.size() < 1)   // size in bytes (not chars)!
     return;
+  // TODO catch binding_not_found exception by calling dbg_get
   print(e.find(varname)); // find instead of get to search parent environments too
 }
 
@@ -132,6 +137,11 @@ void dbg_attributes(RObject o) {
   }
 }
 
+// dbg_attributes(SEXP) is missing
+void dbg_attributes(SEXP x) {
+  dbg_attributes(as<RObject>(x));
+}
+
 // Print the attributes of a variable in an environment (also searches parent environments for the variable)
 void dbg_attributes(Environment e, const char *name) {
   if (name == NULL)
@@ -140,6 +150,7 @@ void dbg_attributes(Environment e, const char *name) {
   if (varname.size() < 1)   // size in bytes (not chars)!
     return;
   // Symbol sym(name);
+  // TODO catch binding_not_found exception by calling dbg_get
   RObject o = as<RObject>(e.find(varname));  // find instead of get to search parent environments too
   dbg_attributes(o);
 }
@@ -178,6 +189,10 @@ void dbg_attributes(RawVector df) {
   dbg_attributes(o);
 }
 
+/**
+ * @title test
+ *
+ */
 void dbg_attributes(CharacterVector df) {
   RObject o = df;
   dbg_attributes(o);
