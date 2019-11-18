@@ -1,0 +1,9 @@
+# On Windows c++11 or c++14 must be enabled else you get some compiler warnings or errors:
+
+# https://stackoverflow.com/questions/25170251/auto-changes-meaning-in-c11-please-remove-it-what-does-this-mean
+# CXXFLAGS = -g3 -O0 -Wall -std=c++11
+
+# dbg_table function uses 'auto' type specifier without trailing return type
+# https://stackoverflow.com/questions/44798728/warning-function-uses-auto-type-specifier-without-trailing-return-type
+
+CXXFLAGS = -g3 -std=c++14  # -O0 -Wall   is GCC specific an cannot be used on all platforms

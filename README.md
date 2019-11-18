@@ -84,7 +84,7 @@ The last column (`...`) contains names of functions specialized for the data typ
 | R function       | `ls()`       | `str()`                | `print()`           | `attributes()`   | `table()`                | `get()`       | `myVar[begin:end]`     |     |
 | char *           | x            | x                      | object name (in global env) | object name (in global env) |                        | object name (in global env) |    |     |
 | std::string      |              |                        |                     |                  |                          |               |                        |     |
-| Rcpp::String     |              |                        | prints the string content |            |                          |               |                        |     |
+| Rcpp::String     |              |                        | prints the string content (!)b |            |                          |               |                        |     |
 | SEXP             |              | x                      |  x                  |  x                | x                       |               |                        |     |
 | Environment      | x            |                        | prints names of all objects in the env | prints attributes of an object in the env | env to search a named object     | | | |
 | ComplexVector    |              | x                      |  x                  |  x               |                          |               |                        |     |
@@ -122,7 +122,8 @@ devtools::install_github("aryoda/CppDebugHelper")
 1. Build your package or C/C++ library called from R with debugging information
 
    - For R packages modify the `Makevars` file via `usethis::usethis::edit_r_makevars()`
-     and add (or edit) the line `CXXFLAGS = -g3 -O0 -Wall`. Save the file.
+     and add (or edit) the line `CXXFLAGS = -g3 -O0 -Wall` (for Linux only).
+     For Windows you have to add `CXXFLAGS = -g3 -std=c++14`. Save the file.
      
      **Don't forget to remove or comment line later or you may slow down your R or newly installed packages!**
 
@@ -200,15 +201,15 @@ Offer public C/C++-level functions to
     - names of an R object (`names` attribute?)
 - DONE (`dbg_ls`): list all variables in an environment (default: global)
 - DONE (`dbg_ls`): inspect R variable in an environment (default: global)
-- TODO (`dbg_subset`): simple vector filtering for important R and Rcpp data types (element range with range checks) (idea: as piped functions)
-- common STL containers (but gdb offers pretty printers for that AFAIK) 
+- WIP (`dbg_subset`): simple vector filtering for important R and Rcpp data types (element range with range checks) (idea: as piped functions)
 - DONE (`dbg_str`): inspect the `str()` of an R variable
 - WIP (`dbg_str`): inspect the `str()` of Rcpp data types
+- WIP (`dbg_table`): tabulation (`table` in R) with limited output (may be quite chatty)
 - summarize vector (like `summary` in R; Rcpp knows "only" `table`) (idea: as piped functions)
-- WIP (`dbg_table`) tabulation (`table` in R) with limited output (may be quite chatty)
 - `head` and `tail` (idea: as piped functions)
 - NA value diagnostics
 - print encoding of strings and string vectors
+- common STL containers (but gdb offers pretty printers for that AFAIK) 
 - optional: change R variable values (eg. via an overloaded function names `dbg_assign()`)
 - optional: change Rcpp variable values
 - optional: `get` function that returns a variable from an environment to be used for filtering
@@ -331,7 +332,45 @@ for what is possible and which limitations apply:
 
 # FAQs
 
+## How to debug on Windows (`gdb` has no `-d` switch)?
+
+On Linux you can debug an R script or R package with `gdb` via `R -d gdb`.
+This start R and attaches `gdb` as debugger.
+
+The `gdb` version delivered on Windows via the `Rtools` does not support the `-d` switch
+(perhaps because you cannot send a signal to running processes to stop the execution for debugging
+like Linux does eg. with the shortcut Ctrl+C).
+
+But: To set a breakpoint in Windows DLL it must be loaded first and this requires R to be started.
+
+Once you have started R you cannot pause R (with out-of-the-box Windows ways) to call the debugger.
+
+The solution is to "debug" the `RGui.exe` which has a built-in menu item *Misc > Break to debugger*.
+This allows you the pause R and work in `gdb`:
+
+```
+gdb /path/to/R/bin/x64/Rgui.exe
+```
+
+To make the source code visible in `gdb` you also
+
+- have to be in the folder where your source code is located or
+- use the `directory` command in `gdb` to add the path to your source code
+
+For details see the [R for Windows FAQ](https://cran.r-project.org/bin/windows/base/rw-FAQ.html#How-do-I-debug-code-that-I-have-compiled-and-dyn_002eload_002ded_003f)
+
+
+
 ## Suppress noisy startup print of `gdb` when debugging with R
+
+```
+R -d gdb --debugger-args=--quiet
+```
+
+
+## How can I pass additional arguments to `gdb`?
+
+You can use the R argument `--debugger-args=ARGS` where `ARGS` are arguments to the debugger.
 
 ```
 R -d gdb --debugger-args=--quiet
@@ -364,6 +403,20 @@ See:
 - [How to use gdb with LD_PRELOAD](https://stackoverflow.com/q/10448254)
 - [What is the LD_PRELOAD trick?](https://stackoverflow.com/questions/426230/what-is-the-ld-preload-trick)
 - [What is preloading?](https://blog.cryptomilk.org/2014/07/21/what-is-preloading/)
+
+
+## During debugging with `gdb` on Windows I see a lot of warning containing `attribute.cpp(92)\dwmapi.dll`. Why?
+
+You can see a lot of warning similar to this one:
+
+> windows\dwm\dwmapi\attribute.cpp(92)\dwmapi.dll!00007FFFAD51594E: (caller: 00007FFFABCA071A) ReturnHr(30) tid(10a0) 80070006 The handle is invalid.
+
+This is a Windows 10 bug. It seems Microsoft has forgotten to disable tracing code before releasing this DLL.
+
+You can ignore these warnings (even though it is annoying to be flooded with them).
+
+For details see:
+https://social.msdn.microsoft.com/Forums/en-US/3a5a145a-c13d-4898-bb61-a5baadc9332f/why-am-i-getting-hundreds-of-weird-messages-in-debug-output-window
 
 
 
