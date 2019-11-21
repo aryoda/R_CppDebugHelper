@@ -77,11 +77,14 @@ For non-obvious cases the meaning of the first argument for the function is desc
 
 The last column (`...`) contains names of functions specialized for the data type.
 
+**TODO: Add row to show signatures to make this table more cheat-sheet alike**
 
-| Data Type        | dbg_ls()     | dbg_str()              | dbg_print()         | dbg_attributes() | dbg_table()              | dbg_get()     | dbg_subset()           | ... |
+| Input Data Type  | dbg_ls()     | dbg_str()              | dbg_print()         | dbg_attributes() | dbg_table()              | dbg_get()     | dbg_subset()           | ... |
 |------------------|:------------:|:----------------------:|:-------------------:|:----------------:|:------------------------:|:-------------:|:----------------------:|:---:|
-| *Function description* | *List objects* | *Print object structure* | *Print object value*  | *Print attributes* | *Return contingency table* | *Return object* | *Return filtered object* |     |
+| *Function description* | *List objects* | *Print object structure* | *Print object value*  | *Print attributes* | *Create contingency table* | *Find object in env* | *Filter objects* |     |
 | *Corresponding R function* | `ls()`       | `str()`                | `print()`           | `attributes()`   | `table()`                | `get()`       | `myVar[begin:end]`     |     |
+| *Return type*    |              |                        |                     |                  | *class "table"*          | *found object* | *same type as input*   |     |
+| *Side effects*   | print        | print                  |  print              |  print           |                          |               |                        |     |
 | char *           | x            | x                      | object name (in global env) | object name (in global env) |                        | object name (in global env) |    |     |
 | std::string      |              |                        |                     |                  |                          |               |                        |     |
 | Rcpp::String     |              |                        | prints the string content (!)b |            |                          |               |                        |     |
