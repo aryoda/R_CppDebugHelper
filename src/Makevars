@@ -13,7 +13,10 @@
 # Package-local Makevars
 # https://cran.r-project.org/doc/manuals/R-exts.html#Creating-shared-objects
 # https://cran.r-project.org/doc/manuals/R-admin.html#Customizing-package-compilation
+# Configure scripts
+# https://cran.r-project.org/doc/manuals/R-admin.html#Multiple-sub_002darchitectures
 PKG_CXXFLAGS = -g3    # -O0 -Wall   is GCC specific an cannot be used on all platforms
+# gcc/clang flags -Wall, -pedantic and -O0 do not work with the default compiler on Solaris.
 
 # Flags that are already set can be overridden by the environment variable MAKEFLAGS
 # MAKEFLAGS="CXXFLAGS = -g3 -O3"   # does not work

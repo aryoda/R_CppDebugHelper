@@ -356,6 +356,29 @@ usethis::edit_r_makevars()
 ```
 
 
+
+## I have compiler errors or warning when building the package on Windows
+
+If you get errors or warnings like
+
+- *Warning: function uses 'auto' type specifier without trailing return type*
+- *Warning: 'auto' changes meaning in C++11; please remove it*
+
+the used CPP compiler uses an older C++ standard as default.
+
+To build successfully you have to enable a newer C++ standard (at least C++14) in the `Makevars` file:
+
+```
+CXXFLAGS = -g3 -O0 -Wall -std=c++14
+```
+
+For details see:
+
+- https://stackoverflow.com/questions/44798728/warning-function-uses-auto-type-specifier-without-trailing-return-type
+- https://stackoverflow.com/questions/25170251/auto-changes-meaning-in-c11-please-remove-it-what-does-this-mean
+
+
+
 ## How to debug on Windows (`gdb` has no `-d` switch)?
 
 On Linux you can debug an R script or R package with `gdb` via `R -d gdb`.
