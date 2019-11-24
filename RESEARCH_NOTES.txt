@@ -409,11 +409,11 @@ Generic functions for R data types via run-time-dispatching via the RCPP_RETURN 
 -> RCPP_RETURN_VECTOR and RCPP_RETURN_MATRIX
    include/Rcpp/macros/dispatch.h
 
-https://stackoverflow.com/questions/58965423/return-subset-of-a-given-sexp-without-knowing-the-actual-internal-data-type?noredirect=1#comment104185955_58965423
-https://stackoverflow.com/questions/19823915/how-can-i-handle-vectors-without-knowing-the-type-in-rcpp/19829440#19829440
-https://stackoverflow.com/questions/55212746/rcpp-fast-statistical-mode-function-with-vector-input-of-any-type/55223792#55223792
-https://stackoverflow.com/questions/16740338/what-is-the-r-to-c-syntax-for-vectors?rq=1
-https://stackoverflow.com/questions/46515052/extending-rcpp-function-to-input-vector-of-any-type?rq=1
+https://stackoverflow.com/questions/58965423/return-subset-of-a-given-sexp-without-knowing-the-actual-internal-data-type
+https://stackoverflow.com/questions/19823915/how-can-i-handle-vectors-without-knowing-the-type-in-rcpp
+https://stackoverflow.com/questions/55212746/rcpp-fast-statistical-mode-function-with-vector-input-of-any-type
+https://stackoverflow.com/questions/16740338/what-is-the-r-to-c-syntax-for-vectors
+https://stackoverflow.com/questions/46515052/extending-rcpp-function-to-input-vector-of-any-type
 
 https://gallery.rcpp.org/articles/rcpp-return-macros/
 

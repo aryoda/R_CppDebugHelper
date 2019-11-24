@@ -408,6 +408,21 @@ For details see the [R for Windows FAQ](https://cran.r-project.org/bin/windows/b
 
 
 
+## During debugging with `gdb` on Windows I see a lot of warning containing `attribute.cpp(92)\dwmapi.dll`. Why?
+
+You can see a lot of warning similar to this one:
+
+> windows\dwm\dwmapi\attribute.cpp(92)\dwmapi.dll!00007FFFAD51594E: (caller: 00007FFFABCA071A) ReturnHr(30) tid(10a0) 80070006 The handle is invalid.
+
+This is a Windows 10 bug. It seems Microsoft has forgotten to disable tracing code before releasing this DLL.
+
+You can ignore these warnings (even though it is annoying to be flooded with them).
+
+For details see:
+https://social.msdn.microsoft.com/Forums/en-US/3a5a145a-c13d-4898-bb61-a5baadc9332f/why-am-i-getting-hundreds-of-weird-messages-in-debug-output-window
+
+
+
 ## Suppress noisy startup print of `gdb` when debugging with R
 
 ```
@@ -452,18 +467,22 @@ See:
 - [What is preloading?](https://blog.cryptomilk.org/2014/07/21/what-is-preloading/)
 
 
-## During debugging with `gdb` on Windows I see a lot of warning containing `attribute.cpp(92)\dwmapi.dll`. Why?
+## Calling a debug function (`dbg_*`) in `gdb` fails with: *Attempt to take address of value not located in memory.*
 
-You can see a lot of warning similar to this one:
+When you call a debug function `gdb` you will get an error message like
 
-> windows\dwm\dwmapi\attribute.cpp(92)\dwmapi.dll!00007FFFAD51594E: (caller: 00007FFFABCA071A) ReturnHr(30) tid(10a0) 80070006 The handle is invalid.
+> Attempt to take address of value not located in memory.
 
-This is a Windows 10 bug. It seems Microsoft has forgotten to disable tracing code before releasing this DLL.
+if an function argument is a variable that is not stored in memory but in a CPU register:
 
-You can ignore these warnings (even though it is annoying to be flooded with them).
+```
+(gdb) call dbg_print(x)
+Attempt to take address of value not located in memory.
+```
 
-For details see:
-https://social.msdn.microsoft.com/Forums/en-US/3a5a145a-c13d-4898-bb61-a5baadc9332f/why-am-i-getting-hundreds-of-weird-messages-in-debug-output-window
+This most probably occurs because you have enabled code optimization during compilation.
+Check if in the `Makevars` file the `-O` flag is set to `-O0` ("optimization = zero").
+Then clean-up the binaries of your code and recompile (*Build > Clean & Rebuild* in RStudio).
 
 
 
