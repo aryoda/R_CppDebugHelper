@@ -15,6 +15,9 @@ Rcpp tutorials
 ! Expose a CPP class to R via Rcpp
   https://www.gormanalysis.com/blog/exposing-a-cpp-student-class-with-rcpp/
 
+Rcpp source code:
+https://github.com/RcppCore/Rcpp
+
 
 
 Debugging Rcpp with gdb on Windows 8 !!!
@@ -29,6 +32,11 @@ Videos:
 Using gdb to debug R packages with native code
 https://vimeo.com/11937905
 
+
+gdb tutorials and cheat sheets:
+
+http://www.yolinux.com/TUTORIALS/GDB-Commands.html
+https://lldb.llvm.org/use/map.html#examining-variables
 
 
 Debug output of Rcpp types (always working despite template and inline behaviour of C++ compilers)
@@ -393,6 +401,36 @@ No C++17 support is enabled in the current default build of R on Windows.
 
 
 
+You will also need to add // [[Rcpp::plugins(cpp11)]] at the top of your cpp file for std::unordered_map and auto.
+
+
+Generic functions for R data types via run-time-dispatching via the RCPP_RETURN macros
+
+-> RCPP_RETURN_VECTOR and RCPP_RETURN_MATRIX
+   include/Rcpp/macros/dispatch.h
+
+https://stackoverflow.com/questions/58965423/return-subset-of-a-given-sexp-without-knowing-the-actual-internal-data-type?noredirect=1#comment104185955_58965423
+https://stackoverflow.com/questions/19823915/how-can-i-handle-vectors-without-knowing-the-type-in-rcpp/19829440#19829440
+https://stackoverflow.com/questions/55212746/rcpp-fast-statistical-mode-function-with-vector-input-of-any-type/55223792#55223792
+https://stackoverflow.com/questions/16740338/what-is-the-r-to-c-syntax-for-vectors?rq=1
+https://stackoverflow.com/questions/46515052/extending-rcpp-function-to-input-vector-of-any-type?rq=1
+
+https://gallery.rcpp.org/articles/rcpp-return-macros/
+
+https://gallery.rcpp.org/articles/rcpp-wrap-and-recurse/
+
+https://stackoverflow.com/questions/55212746/rcpp-fast-statistical-mode-function-with-vector-input-of-any-type/55223792#55223792
+-> Disable a non-supported RTYPE from the RCPP_RETURN macros:
+     template <int RTYPE>
+     Vector<RTYPE> fastModeImpl(Vector<RTYPE> x, bool narm) { ... }
+
+     template <>
+     Vector<CPLXSXP> fastModeImpl(Vector<CPLXSXP> x, bool narm) {
+       stop("Not supported SEXP type!"); }
+
+     // [[Rcpp::export]]
+     SEXP fastMode( SEXP x, bool narm = false ) {
+       RCPP_RETURN_VECTOR(fastModeImpl, x, narm); }
 
 
 

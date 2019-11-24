@@ -479,6 +479,8 @@ GPL-3 (see file [LICENSE](LICENSE))
 
 - [gdb documentation](https://sourceware.org/gdb/onlinedocs/gdb)
 - TODO Links to gdb tutorials + cheat sheets
+  - [YoLinux.com GDB command cheat sheet](http://www.yolinux.com/TUTORIALS/GDB-Commands.html)
+  - [GDB to LLDB command map](https://lldb.llvm.org/use/map.html#examining-variables)
 - `gdb` does not know default arguments:
   - https://stackoverflow.com/questions/58827121/how-to-use-c-default-arguments-in-the-call-command-of-gdb?noredirect=1#comment103957145_58827121
   - https://sourceware.org/gdb/onlinedocs/gdb/C-Plus-Plus-Expressions.html
