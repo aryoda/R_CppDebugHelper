@@ -20,6 +20,13 @@ List debug_example_rcpp() {
     // Datetime(const std::string &s, const std::string &fmt="%Y-%m-%d %H:%M:%OS");
     DatetimeVector dt    = DatetimeVector::create(1293753600, Datetime("2011-01-01"), Datetime("2011-05-29 10:15:30"), NA_REAL);
 
+    ComplexVector  cv(10);
+    Rcomplex rc;
+    for(int i = 0; i < 4; i++) {
+        rc.r = rc.i = i + 0.0;
+        cv[i] = rc;
+    }
+
     List z               = List::create(x, y, df, s);
 
     Environment e = Rcpp::Environment::global_env();

@@ -77,36 +77,36 @@ For non-obvious cases the meaning of the first argument for the function is desc
 
 The last column (`...`) contains names of functions specialized for the data type.
 
-**TODO: Add row to show signatures to make this table more cheat-sheet alike**
+**TODO: Add row to show signatures to make this table more cheat-sheet alike. SEXP should always return an SEXP. Show example calls...**
 
-| Input Data Type  | dbg_ls()     | dbg_str()              | dbg_print()         | dbg_attributes() | dbg_table()              | dbg_get()     | dbg_subset()           | ... |
+| Input Data Type  | dbg_ls()     | dbg_str()              | dbg_print()         | dbg_attributes() | dbg_table()              | dbg_get()     | dbg_subset()           | Others... |
 |------------------|:------------:|:----------------------:|:-------------------:|:----------------:|:------------------------:|:-------------:|:----------------------:|:---:|
 | *Function description* | *List objects* | *Print object structure* | *Print object value*  | *Print attributes* | *Create contingency table* | *Find object in env* | *Filter objects* |     |
 | *Corresponding R function* | `ls()`       | `str()`                | `print()`           | `attributes()`   | `table()`                | `get()`       | `myVar[begin:end]`     |     |
-| *Return type*    |              |                        |                     |                  | *class "table"*          | *found object* | *same type as input*   |     |
+| *Return type*    |              |                        |                     |                  | *IntegerVector of class "table"*          | *found object* | *same type as input*   |     |
 | *Side effects*   | print        | print                  |  print              |  print           |                          |               |                        |     |
-| char *           | x            | x                      | object name (in global env) | object name (in global env) |                        | object name (in global env) |    |     |
-| std::string      |              |                        |                     |                  |                          |               |                        |     |
-| Rcpp::String     |              |                        | prints the string content (!)b |            |                          |               |                        |     |
-| SEXP             |              | x                      |  x                  |  x                | x                       |               |                        |     |
-| Environment      | x            |                        | prints names of all objects in the env | prints attributes of an object in the env | env to search a named object     | | | |
-| ComplexVector    |              | x                      |  x                  |  x               |                          |               |                        |     |
-| DataFrame        |              | x                      |  x                  |  x               |                          |               |                        |     |
-| IntegerVector    |              | x                      |  x                  |  x               |                          |               |                        |     |
-| LogicalVector    |              | x                      |  x                  |  x               |                          |               |                        |     |
+| char *           |              | object name (in global env) | object name (in global env) | object name (in global env) |                        | object name (in global env) |    | dbg_as_std_string(x) |
+| std::string      |              |                        | TODO (semantics?)   |                  |                          |               |                        |     |
+| Rcpp::String     |              |                        | prints the string content |            |                          |               |                        |     |
+| SEXP             |              | x                      |  x                  |  x               | x                        |               |                        |     |
+| Environment      | print names of all objects in the env | str() of an object in the env | prints names of all objects in the env | prints attributes of an object in the env | env to search a named object | get object from the env | | |
+| ComplexVector    |              | x                      |  x                  |  x               | (not supported in R)     |               |                        |     |
+| DataFrame        |              | x                      |  x                  |  x               | (not supported)          |               |                        |     |
+| IntegerVector    |              | x                      |  x                  |  x               | x                        |               |                        |     |
+| LogicalVector    |              | x                      |  x                  |  x               | x                        |               |                        |     |
 | NumericVector    |              | x                      |  x                  |  x               | x                        |               |                        |     |
-| DoubleVector     |              | x                      |  x                  |  x               |                          |               |                        |     |
-| RawVector        |              | x                      |  x                  |  x               |                          |               |                        |     |
-| CharacterVector  |              | x                      |  x                  |  x               |                          |               |                        |     |
-| StringVector     |              | x                      |  x                  |  x               |                          |               |                        |     |
-| GenericVector    |              | x                      |  x                  |  x               |                          |               |                        |     |
-| ExpressionVector |              | x                      |  x                  |  x               |                          |               |                        |     |
-| Rcpp::List       |              | x                      |  x                  |  x               |                          |               |                        |     |
-| DateVector       |              | x                      |  x                  |  x               |                          |               |                        |     |
-| DatetimeVector   |              | x                      |  x                  |  x               |                          |               |                        |     |
+| DoubleVector     |              | x                      |  x                  |  x               | x                        |               |                        |     |
+| RawVector        |              | x                      |  x                  |  x               | (not supported in R)     |               |                        |     |
+| CharacterVector  |              | x                      |  x                  |  x               | x                        |               |                        |     |
+| StringVector     |              | x                      |  x                  |  x               | x                        |               |                        |     |
+| ExpressionVector |              | x                      |  x                  |  x               | (not supported in R)     |               |                        |     |
+| GenericVector    |              | x                      |  x                  |  x               | (not supported in Rcpp)  |               |                        |     |
+| Rcpp::List       |              | x                      |  x                  |  x               | (not supported by Rcpp)  |               |                        |     |
+| DateVector       |              | x                      |  x                  |  x               | x                        |               |                        |     |
+| DatetimeVector   |              | x                      |  x                  |  x               | x                        |               |                        |     |
 | ... Matrices...  |              |                        |                     |                  |                          |               |                        |     |
 
-*Note: This table was created using http://www.tablesgenerator.com/markdown_tables*
+*Note: This table was initally created using http://www.tablesgenerator.com/markdown_tables*
 
 
 
@@ -208,7 +208,7 @@ Offer public C/C++-level functions to
 - subset `data.frame`s (rows and columns)
 - DONE (`dbg_str`): inspect the `str()` of an R variable
 - WIP (`dbg_str`): inspect the `str()` of Rcpp data types
-- WIP (`dbg_table`): tabulation (`table` in R) with limited output (may be quite chatty)
+- DONE (`dbg_table`): tabulation (`table` in R) with limited output (may be quite chatty)
 - summarize vector (like `summary` in R; Rcpp knows "only" `table`) (idea: as piped functions)
 - `head` and `tail` (idea: as piped functions)
 - NA value diagnostics

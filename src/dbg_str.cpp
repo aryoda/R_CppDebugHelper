@@ -75,3 +75,52 @@ void dbg_str(DataFrame df) {
 }
 
 
+
+void dbg_str(ComplexVector x) {
+  Function f = Environment::global_env().find("str");  // should be in "namespace:utils"
+  f(x);  // does print via R
+}
+
+void dbg_str(IntegerVector x) {
+  Function f = Environment::global_env().find("str");  // should be in "namespace:utils"
+  f(x);  // does print via R
+}
+void dbg_str(LogicalVector x) {
+  Function f = Environment::global_env().find("str");  // should be in "namespace:utils"
+  f(x);  // does print via R
+}
+void dbg_str(NumericVector x) {
+  Function f = Environment::global_env().find("str");  // should be in "namespace:utils"
+  f(x);  // does print via R
+}
+void dbg_str(RawVector x) {
+  Function f = Environment::global_env().find("str");  // should be in "namespace:utils"
+  f(x);  // does print via R
+}
+
+
+void dbg_str(CharacterVector x) {
+  Function f = Environment::global_env().find("str");  // should be in "namespace:utils"
+  f(x);  // does print via R
+}
+
+// same as GenericVector
+void dbg_str(List x) {
+  Function f = Environment::global_env().find("str");  // should be in "namespace:utils"
+  f(x);  // does print via R
+}
+
+void dbg_str(ExpressionVector x) {
+  Function f = Environment::global_env().find("str");  // should be in "namespace:utils"
+  f(x);  // does print via R
+}
+
+void dbg_str(DateVector x) {
+  Function f = Environment::global_env().find("str");  // should be in "namespace:utils"
+  f(x);  // does print via R
+}
+
+void dbg_str(DatetimeVector x) {
+  Function f = Environment::global_env().find("str");  // should be in "namespace:utils"
+  f(x);  // does print via R
+}

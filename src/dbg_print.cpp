@@ -156,7 +156,7 @@ void dbg_print(Environment e) {
 
 
 
-// print the value of the string
+// print the value of the string (x is NOT interpreted as containing a variable name!)
 void dbg_print(Rcpp::String x) {
   if (x == NULL || x.get_sexp() == NULL )   // TODO avoid NULL pointer crashes ;-)
     return;
