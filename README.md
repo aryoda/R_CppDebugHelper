@@ -38,12 +38,19 @@ TODO
 
 Functional requirements:
 
-1. Inspect variable values of `R` and `Rcpp` variables
+1. Inspect variable values of `R` and `Rcpp` variables during debugging
 
-1. Optional support for modifying variable values (to try to find bug fixes during debugging)
+1. Debugging support for C++ code
+
+1. Optional: Debugging support for plain C code
+
+1. Optional: Support for modifying variable values (to try to find bug fixes during debugging)
+
 
 
 Non-functional requirements:
+
+1. Support for at least `gdb` and `LLDB` debuggers
 
 1. Minimize preparation efforts for debugging
 
@@ -56,6 +63,7 @@ Non-functional requirements:
     - short function names
     - overloaded debugging helper functions to let `gdb` decide which function to call instead
       of forcing the user to find the right function name by knowing the data type
+
 
 
 # Functions and supported data types
@@ -137,7 +145,7 @@ devtools::install_github("aryoda/CppDebugHelper")
    If you have multiple locations you can add more locations in `gdb` later via
    the `directory` command (see `help directory` in `gdb`).
 
-1. Start the gdb debugger debugging your own code or package:
+1. Start the debugger:
 
     ```
     # open a command shell ("terminal")
@@ -146,6 +154,12 @@ devtools::install_github("aryoda/CppDebugHelper")
     # on Windows use
     gdb /path/to/R-3.x.x/bin/x64/Rgui.exe
     ```
+    
+    **Note:**
+    You can use `gdb` or `llvm` but all examples here are based on `gdb`.
+    You can use this [GDB to LLDB command map](https://lldb.llvm.org/use/map.html)
+    to "translate" the example `gdb` commands to `lldb`.
+    
 
 1. Start R in `gdb`
 
@@ -239,7 +253,26 @@ A function for automatic installation or at least instructions would be helpful.
 
 TODO
 
+- Does this package also support debugging of plain C code if `Rcpp` is not used at all?
+  `R` is implemented in C and this packages uses function overloading which is not
+  a supported feature in the C language (AFAIK).
 
+- Verify that `lldb` can also be used (see FAQ entry for that)
+
+- Explain why this package delivers CPP functions instead of a `gdb` pretty printers
+  (short answer: this pkg shall be debugger independent but pretty printers are debugger specific
+   + a pretty printer needs to call a specific debug helper function anyhow
+   + the debug functions do already print very pretty ;-)
+
+- Explain when compilers generate the code from template definitions.
+
+  Since the compiler generates the code from the template definition,
+  it means that the full definitions need to be visible to the calling code,
+  not only the declaration, as was the case for functions and classes.
+  
+  => Rcpp always contains the template definitions in the header files (I guess -> check it)
+  
+  
 
 ## Known limitations
 
@@ -303,7 +336,7 @@ for what is possible and which limitations apply:
   ```
   
 - `gdb` does not apply pagination for `Rcpp::print()` output
-- `gdb`'s `display` command does not work with call (`display call f()` is not allowed)
+- `gdb`'s `display` command does not work with the `call` command (`display call f()` is not allowed)
   so printing each time the program stops into `gdb` does not work
 - `gdb` does not know the C++ bool constants `true` and `false` that could be used as an argument in function calls.
    Luckily `Rcpp` includes the `R` API header file `Boolean.h` which defines an enum for that
@@ -483,6 +516,15 @@ Attempt to take address of value not located in memory.
 This most probably occurs because you have enabled code optimization during compilation.
 Check if in the `Makevars` file the `-O` flag is set to `-O0` ("optimization = zero").
 Then clean-up the binaries of your code and recompile (*Build > Clean & Rebuild* in RStudio).
+
+
+
+## Can I use the `lldb` debugger instead of `gdb`?
+
+All examples here are based on `gdb` but it should be possible to use `llvm` instead of `gdb`
+because this packages does not depend on any special debugger.
+
+You can use this [GDB to LLDB command map](https://lldb.llvm.org/use/map.html) to "translate" the example `gdb` commands to `lldb` commands.
 
 
 

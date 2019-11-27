@@ -435,3 +435,15 @@ https://stackoverflow.com/questions/55212746/rcpp-fast-statistical-mode-function
 
 
 
+CPP non-type template parameters (Rcpp uses on-type parameter for the SEXP type, but also type parameters):
+
+template<typename T, unsigned int size>
+Array {
+  // Implementation
+};
+
+Why would we use a non-type template parameter instead of a regular parameter?
+
+The main difference is when the parameter is known to the program. Like all the template parameters and unlike the non-template parameters, the value must be known at compile time.
+
+This is useful when we want to use the parameters in expressions that need to be evaluated at compile time.
