@@ -50,7 +50,7 @@ Functional requirements:
 
 Non-functional requirements:
 
-1. Support for at least `gdb` and `LLDB` debuggers
+1. Support for at least `gdb` and optionally the `LLDB` debugger
 
 1. Minimize preparation efforts for debugging
 
@@ -156,7 +156,9 @@ devtools::install_github("aryoda/CppDebugHelper")
     ```
     
     **Note:**
-    You can use `gdb` or `llvm` but all examples here are based on `gdb`.
+    All examples here are based on `gdb`.
+    `lldb` does not work so far  (for the current status see [issue #5](https://github.com/aryoda/R_CppDebugHelper/issues/5)),
+    but perhaps you are the lucky one ;-)
     You can use this [GDB to LLDB command map](https://lldb.llvm.org/use/map.html)
     to "translate" the example `gdb` commands to `lldb`.
     
@@ -227,7 +229,8 @@ Offer public C/C++-level functions to
 - `head` and `tail` (idea: as piped functions)
 - NA value diagnostics
 - print encoding of strings and string vectors
-- common STL containers (but gdb offers pretty printers for that AFAIK) 
+- common STL containers (but gdb offers pretty printers for that AFAIK)
+- optional: set `options("max.print")` to reduce print results to a sensible maximum (default is 99999!)
 - optional: change R variable values (eg. via an overloaded function names `dbg_assign()`)
 - optional: change Rcpp variable values
 - optional: `get` function that returns a variable from an environment to be used for filtering
@@ -271,7 +274,8 @@ TODO
   not only the declaration, as was the case for functions and classes.
   
   => Rcpp always contains the template definitions in the header files (I guess -> check it)
-  
+
+
   
 
 ## Known limitations
@@ -521,10 +525,15 @@ Then clean-up the binaries of your code and recompile (*Build > Clean & Rebuild*
 
 ## Can I use the `lldb` debugger instead of `gdb`?
 
-All examples here are based on `gdb` but it should be possible to use `llvm` instead of `gdb`
+All examples here are based on `gdb` but it should *theoretically* be possible to use `llvm` instead of `gdb`
 because this packages does not depend on any special debugger.
 
 You can use this [GDB to LLDB command map](https://lldb.llvm.org/use/map.html) to "translate" the example `gdb` commands to `lldb` commands.
+
+**In practice it did not work so far (for the current status see [issue #5](https://github.com/aryoda/R_CppDebugHelper/issues/5)).**
+
+See also:
+[Is it possible to debug a gcc-compiled program using lldb, or debug a clang-compiled program using gdb?](https://stackoverflow.com/questions/21132194/is-it-possible-to-debug-a-gcc-compiled-program-using-lldb-or-debug-a-clang-comp)
 
 
 
