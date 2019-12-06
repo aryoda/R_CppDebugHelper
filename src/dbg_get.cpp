@@ -43,7 +43,7 @@ SEXP dbg_get(const char *name) {
 
 
 // Test function with default values to find out if gdb uses the default values.
-// Note: gdb does not know default values (only the compiler knows) so using default values does not work
+// Result: gdb does not know default values (only the compiler knows) so using default values does not work
 // void dbg_test(int a = 1) {
 //   std::cout << a << std::endl;
 // }

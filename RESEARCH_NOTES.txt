@@ -1,3 +1,9 @@
+https://gallery.rcpp.org/articles/first-steps-with-C++11/
+// Enable C++11 via this plugin (Rcpp 0.10.3 or later)
+// [[Rcpp::plugins(cpp11)]]
+
+
+
 Rcpp quick ref
 http://dirk.eddelbuettel.com/code/rcpp/Rcpp-quickref.pdf
 
@@ -404,6 +410,7 @@ No C++17 support is enabled in the current default build of R on Windows.
 You will also need to add // [[Rcpp::plugins(cpp11)]] at the top of your cpp file for std::unordered_map and auto.
 
 
+
 Generic functions for R data types via run-time-dispatching via the RCPP_RETURN macros
 
 -> RCPP_RETURN_VECTOR and RCPP_RETURN_MATRIX
@@ -473,4 +480,225 @@ https://bogotobogo.com/cplusplus/CppCrashDebuggingMemoryLeak.php
 (lldb) script lldb.process.LoadImage(lldb.SBFileSpec("debugHelper.dylib", False), lldb.SBError())
 # You can also use process load at the lldb command line.
 
+
+
+Structuring a package embedding a C++ library containing cpp and hpp files
+https://community.rstudio.com/t/structuring-a-package-embedding-a-c-library-containing-cpp-and-hpp-files/11696
+I'm working on exposing a C++ library that contains cpp and corresponding hpp files (essentially 1 hpp per cpp file + meta hpp files that include other hpp files).
+I'm wondering what the best / "most accepted" way to structure this is.
+
+-> Generally I would suggest putting all of the library code in a subdirectory under src/.
+
+pkg
+  src
+    Makevars
+    R_pkg_specific_code.cc
+      vender-code/
+        vender-src.cc
+
+See https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Compiling-in-sub_002ddirectories for how to setup your Makevars to do this (assuming the vendor library has a suitable makefile you can call).
+
+See this pkg as example: https://github.com/cran/Rcsdp/tree/master/src
+
+
+
+The R-extensions section on Makevars is a must read:
+https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Using-Makevars
+
+
+
+I have read this article several times, but still feel confused about the conclusion of it, which is don’t use C++ to interface with R.
+https://developer.r-project.org/Blog/public/2019/03/28/use-of-c---in-packages/index.html
+-> The article is talking about writing C++ programs that make calls to R programs and explains the problems that can cause with the C++ code.
+See also:
+https://stat.ethz.ch/pipermail/r-devel/2019-March/077560.html
+
+In my opinion (formed after re-reads, research, and even asking around)- the original negative r-project.org 1 article is wrong on some of its key technical points (for example: there is no C++ interface to R, article fails to emphasize Rcpp properly uses the C interface, article doesn't mention important history of .C versus .Call, and so on) and does not support a clear conclusion (let alone a conclusion of "don’t use C++ to interface with R"). I respect that the article is coming from a knowledgeable R authority, but feel the article has not been a good thing for the R community.
+
+If the article had been carefully labeled as being only about "writing C++ programs that make calls to R" that would have helped. But it is hard to support that position as the original article starts with "About 20% packages from CRAN and BIOC repositories include some native code and more than a half of those include some code in C++". That commonly means R using C++ for extensions.
+
+Perhaps the article should have been on a personal blog, or r-project.org 1 should become a formally refereed source (if one is going to treat it as authoritative).
+
+
+
+ROOT is ...
+https://root.cern/
+A modular scientific software toolkit. It provides all the functionalities needed to deal with big data processing, statistical analysis, visualisation and storage. It is mainly written in C++ but integrated with other languages such as Python and R.
+
+
+
+rr debuger (with reverse execution)
+https://fitzgeraldnick.com/2015/11/02/back-to-the-futurre.html
+https://rr-project.org/
+
+
+
+# Video: Debugging compiled code in R with lldb (Jim Hester)
+https://www.youtube.com/watch?v=R3-IMGyNJY4
+# start lldb
+R -d lldb
+
+# clang commands
+Ctrl-C to interrupt execution
+
+r[estart] / c[continue]
+up / down
+bt
+b
+br list
+br di
+br en
+br de
+
+## All exceptions
+break set -E c++
+
+## Particular exception
+break set -F std::range_error
+
+# R funs
+
+## Print value of object
+Rf_PrintValue() / R_PV
+
+## Inspect SEXP
+R_inspect() / R_inspect3() # to limit the amount of recursion
+
+## Print R Traceback from C
+Rf_PrintValue(R_GetTraceback(0))
+
+## Print Rcpp vector
+Rf_PrintValue(vec.data)
+
+
+
+Rf_PrintValue(). See also R_inspect(), and Rf_PrintValue(x->attrib) to view attributes of a SEXP.
+
+
+
+# Video: Using gdb to debug a multi-module C code library loaded into R and called from R code
+https://www.youtube.com/watch?v=SJdGxL0wrBA
+
+
+
+debugit example package to practice debugging:
+https://blog.davisvaughan.com/2019/04/05/debug-r-package-with-cpp/
+https://github.com/DavisVaughan/debugit
+devtools::install_github("DavisVaughan/debugit")
+
+
+
+How to debug Rcpp code in a package
+https://gist.github.com/alexg9010/1ab89ecb28c43f8bc217d2facca77f0a
+ how_to_debug_rcpp.Rmd
+
+
+
+http://dirk.eddelbuettel.com/papers/rcpp_uzuerich_2015_part5_packaging.pdf
+Debugging is unfortunately platform-specific
+- When the compiler isg++, the debugger isgdb
+- When the compiler isclang++, the debugger islldb.
+- I useg++more often (under Linux) so we’ll focus ongdb.
+However,lldbis very simila
+
+
+http://r-pkgs.had.co.nz/src.html#src-debugging
+
+
+
+Calling a user-defined R function from C++ using Rcpp
+https://stackoverflow.com/questions/21225662/calling-a-user-defined-r-function-from-c-using-rcpp?rq=1
+#include <Rcpp.h>
+using namespace Rcpp;
+
+// [[Rcpp::export]]
+SEXP mySuminC(){
+  Environment myEnv = Environment::global_env();
+  Function mySum = myEnv["mySum"];
+  int x = myEnv["x"];
+  int y = myEnv["y"];
+  return mySum(Rcpp::Named("x", x), Rcpp::Named("y", y));
+}
+# (or, leave function return as int and use as<int> in place of wrap).
+
+
+
+https://stackoverflow.com/questions/37665361/how-to-determine-the-class-of-object-stored-in-sexp-in-rcpp
+https://stackoverflow.com/questions/24622918/initialize-a-variable-with-different-type-based-on-a-switch-statement
+// the dispatch code
+
+// [[Rcpp::export]]
+SEXP GetDiag(SEXP pMat) {
+  switch (TYPEOF(pMat)) {
+  case INTSXP: return GetDiag_impl<IntegerMatrix>(pMat);
+  case REALSXP: return GetDiag_impl<NumericMatrix>(pMat);
+  <...>
+  }
+
+
+// attributes
+// std::vector<std::string> nm = X.attributeNames();
+// https://teuder.github.io/rcpp4everyone_en/202_attributes.html
+// https://stackoverflow.com/questions/54693381/how-to-create-a-list-with-attributes-with-rcpp
+// https://stackoverflow.com/questions/58965423/return-subset-of-a-given-sexp-without-knowing-the-actual-internal-data-type
+// https://gallery.rcpp.org/articles/setting-object-attributes/
+
+
+
+// Keep factors like shown here:
+// https://stackoverflow.com/questions/58965423/return-subset-of-a-given-sexp-without-knowing-the-actual-internal-data-type?noredirect=1
+// if (x.hasAttribute("levels")){
+//   subset.attr("class") = x.attr("class");
+//   subset.attr("levels") = x.attr("levels");
+// }
+
+
+https://stackoverflow.com/questions/47246200/how-to-slice-rcpp-numericvector-for-elements-2-to-101
+
+
+
+Concatenate two vectors (sugar function may exist nowadays):
+http://lists.r-forge.r-project.org/pipermail/rcpp-devel/2014-January/007025.html
+
+template <const int RTYPE>
+Vector<RTYPE> do_conc_(Vector<RTYPE> x, Vector<RTYPE> y){
+  int nx=x.size(), n=x.size()+y.size(),i,j;
+  Vector<RTYPE> out=no_init(n);
+  for (i=0; i<nx; ++i){ out[ i ] = x[ i ];}
+  for (j=i, i=0; j<n; ++j, ++i){ out[ j ] = y[i] ;}
+  return out;
+}
+
+// [[Rcpp::export]]
+SEXP conc( SEXP& XX_, SEXP& YY_){
+  int type = TYPEOF(XX_) ;
+  switch( type ){
+  case INTSXP  : return do_conc_<INTSXP> ( XX_, YY_ ) ;
+  case REALSXP : return do_conc_<REALSXP>( XX_, YY_ ) ;
+  case STRSXP  : return do_conc_<STRSXP> ( XX_, YY_ ) ;
+  case VECSXP  : return do_conc_<VECSXP> ( XX_, YY_ ) ;
+  }
+  return R_NilValue ;
+}
+
+
+
+    // Possible options to print values in Rcpp:
+    // https://stackoverflow.com/questions/28152406/print-integer-vector-from-rcpp-function
+    // https://stackoverflow.com/questions/35982284/how-to-print-an-r-object-to-stderr-in-rcpp
+    // https://stackoverflow.com/questions/51169994/how-to-print-raw-values-in-rcpp
+    // 1. Rf_PrintValue(a);
+    // 2. Rcpp::print(a); // wraps the Rf_PrintValue
+    // 3. Rcpp::Rcout << a << std::endl; // or Rcpp::Rcerr for output on the stderr device
+    // SEXP a = Rcpp::wrap(x);
+    // print(a);
+    //
+    // // Functions to print R objects
+    // Rcpp::Rcout << "Debug output:" << std::endl;
+    // Rf_PrintValue(x);
+    // print(SEXPREC *)
+    // print(y);
+    // // R_PV(x);  // R API function (not from Rcpp). Calls Rf_PrintValue internally?
+    // // R_PV was not declared in this scope
+    // Rcpp::Rcout << "End of debug output" << std::endl;
 

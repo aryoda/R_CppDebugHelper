@@ -18,6 +18,8 @@ void dbg_str(const char *name) {
       return;
     Environment e = Rcpp::Environment::global_env();
     RObject o = e.find(varname);
+    // TODO What is the difference to
+    //   Function f("str"); // "declare" R function
     Function f = e.find("str");  // should be in "namespace:utils"
     // Rcpp::print(f);
     f(o);  // does print via R

@@ -47,7 +47,7 @@
  typedef Vector<STRSXP>  CharacterVector ;  // supported by RCPP_RETURN_VECTOR
  typedef Vector<STRSXP>  StringVector ;     // alias
  typedef Vector<VECSXP>  GenericVector ;    // alias
- typedef Vector<VECSXP>  List ;             // supported by RCPP_RETURN_VECTOR
+ typedef Vector<VECSXP>  List ;             // supported by RCPP_RETURN_VECTOR - DataFrame is also a list?!
  typedef Vector<EXPRSXP> ExpressionVector ; // supported by RCPP_RETURN_VECTOR
 
  typedef Matrix<CPLXSXP> ComplexMatrix ;
@@ -72,6 +72,12 @@
  typedef newDatetimeVector DatetimeVector;  // is a NumericVector internally
 
  Source: Taken from Rcpp's include/Rcpp/date_datetime/date_datetime.h
+
+
+
+ typedef DataFrame_Impl<PreserveStorage> DataFrame ;
+
+ Source: include/Rcpp/DataFrame.h
 
  */
 

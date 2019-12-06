@@ -51,7 +51,7 @@ void dbg_print(const char *name) {
   Environment e = Rcpp::Environment::global_env();
   // print(e.get(name));
   // TODO catch binding_not_found exception by calling dbg_get
-  print(e.find(varname)); // find instead of get to search parent environments too
+  Rcpp::print(e.find(varname)); // find instead of get to search parent environments too
 }
 
 
@@ -139,7 +139,7 @@ void dbg_print(Environment e, const char *name) {
   if (varname.size() < 1)   // size in bytes (not chars)!
     return;
   // TODO catch binding_not_found exception by calling dbg_get
-  print(e.find(varname)); // find instead of get to search parent environments too
+  Rcpp::print(e.find(varname)); // find instead of get to search parent environments too
 }
 
 
