@@ -223,7 +223,7 @@ Rcpp::DataFrame dbg_subset(Rcpp::DataFrame x, R_xlen_t row_index_from, R_xlen_t 
   // convert Rcpp index values from 0-based to R's 1-based index values (see include/Rcpp/sugar/Range.h)
   r++;
 
-  Rcpp::Rcout << "data.frame row subset: " << r.get_start() << "-" << r.get_end() << std::endl;
+  // Rcpp::Rcout << "data.frame row subset: " << r.get_start() << "-" << r.get_end() << std::endl;
 
   // Rcpp::IntegerVector(r.begin(), r.end())
   return subset(x, r, R_MissingArg);  // row numbers in "r" seem to be shifted from 0-based to 1-base when calling R
@@ -241,7 +241,7 @@ SEXP dbg_subset(SEXP x, R_xlen_t index_from, R_xlen_t index_to){
   // TODO data.frame's are currently handled as lists. Add an alternative implementation here...
   //      May require including the SEXP internal data structure to query the internal type...
   if (Rf_inherits(x, "data.frame")) {
-    Rcpp::Rcout << "data.frame recognized..." << std::endl;
+    // Rcpp::Rcout << "data.frame recognized..." << std::endl;
     // convert R index values from 1-based to Rcpp's 0-based
     return dbg_subset(Rcpp::as<DataFrame>(x), index_from - 1, index_to - 1);
   }
