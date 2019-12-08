@@ -138,7 +138,7 @@ devtools::install_github("aryoda/CppDebugHelper")
 
    - For R packages modify the `Makevars` file via `usethis::usethis::edit_r_makevars()`
      and add (or edit) the line `CXXFLAGS = -g3 -O0 -Wall` (for Linux only).
-     For Windows you have to add `CXXFLAGS = -g3 -std=c++14`. Save the file.
+     For Windows you have to add `CXXFLAGS = -g3 -std=c++11`. Save the file.
      
      **Don't forget to remove or comment line later or you may slow down your R or newly installed packages!**
 
@@ -242,6 +242,14 @@ Offer public C/C++-level functions to
 - optional: change Rcpp variable values
 - optional: support for data types of packages derived from `Rcpp` (eg. ` RcppArmadillo`)
 - optional: show how to use logging in Rcpp code that is synchronised with logging in R (hopefully even the same logging package)
+- optional: provide gdb macros as shortcuts for the dbg_* functions.
+            See: http://www.yolinux.com/TUTORIALS/src/dbinit_stl_views-1.03.txt
+- optional: RStudio addin to configure everything, give hints for missing tools and
+            start debugging via gdb in the RStudio terminal. The variable values of the current frame
+            could be shown in the "Environment" windows of RStudio. Execution commands
+            like `next` could be presented as buttons and with keyboard shortcuts.
+            Breakpoints could be set in the code as usual and "translated" into `gdb`
+            breakpoints automatically...
 
 **Note:** Each print function should respect `getOption("max.print")` and cut the output
 with `[ reached getOption("max.print") -- omitted 9000 entries ]`
@@ -400,7 +408,7 @@ usethis::edit_r_makevars()
 
 
 
-## I have compiler errors or warning when building the package on Windows
+## I have compiler errors or warning when building this package on Windows
 
 If you get errors or warnings like
 
@@ -409,10 +417,11 @@ If you get errors or warnings like
 
 the used CPP compiler uses an older C++ standard as default.
 
-To build successfully you have to enable a newer C++ standard (at least C++14) in the `Makevars` file:
+To build successfully you have to enable a newer C++ standard (at least C++11) in the `Makevars` file:
 
 ```
-CXXFLAGS = -g3 -O0 -Wall -std=c++14
+CXXFLAGS = -g3 -O0 -Wall -std=c++11
+# CXXFLAGS = -g3 -O0 -Wall -std=c++14   # or this for C++14
 ```
 
 For details see:
@@ -422,7 +431,9 @@ For details see:
 
 
 
-## How to debug on Windows (`gdb` has no `-d` switch)?
+## How can I debug on Windows (`R` has no `-d` switch)?
+
+Precondition: The code under inspection has been compiled for debugging (TODO: add link to howto instructions)
 
 On Linux you can debug an R script or R package with `gdb` via `R -d gdb`.
 This start R and attaches `gdb` as debugger.
@@ -451,7 +462,7 @@ For details see the [R for Windows FAQ](https://cran.r-project.org/bin/windows/b
 
 
 
-## During debugging with `gdb` on Windows I see a lot of warning containing `attribute.cpp(92)\dwmapi.dll`. Why?
+## During debugging with `gdb` on Windows I see a lot of warnings containing `attribute.cpp(92)\dwmapi.dll`
 
 You can see a lot of warning similar to this one:
 
@@ -463,6 +474,27 @@ You can ignore these warnings (even though it is annoying to be flooded with the
 
 For details see:
 https://social.msdn.microsoft.com/Forums/en-US/3a5a145a-c13d-4898-bb61-a5baadc9332f/why-am-i-getting-hundreds-of-weird-messages-in-debug-output-window
+
+
+
+## Debugging with `gdb` on Windows fails with error "cannot execute this command while the selected thread is running"
+
+Sometimes during debugging it is no longer possible to step (via the `next` command) or continue the execution.
+
+The error message is:
+
+```
+(gdb) c
+Continuing.
+Cannot execute this command while the selected thread is running.
+```
+
+This problem was observed with `gdb --version` *GNU gdb (GDB) 7.9.1* as installed with Rtools v3.5 and is not easily reproducible.
+
+This seems to be bug but the exact reason is unclear:
+
+- https://stackoverflow.com/questions/16900615/gdb-step-not-working-as-expected
+- https://sourceware.org/bugzilla/show_bug.cgi?id=17134
 
 
 
@@ -531,7 +563,9 @@ Then clean-up the binaries of your code and recompile (*Build > Clean & Rebuild*
 
 ## Can I use the `lldb` debugger instead of `gdb`?
 
-All examples here are based on `gdb` but it should *theoretically* be possible to use `llvm` instead of `gdb`
+`lldb` is the default debugger in Xcode on macOS/OS X for C++ and typically used with the `Clang` compiler.
+
+All examples here are based on `gdb` but it should (= not yet tested!) be possible to use `llvm` instead of `gdb`
 because this packages does not depend on any special debugger.
 
 You can use this [GDB to LLDB command map](https://lldb.llvm.org/use/map.html) to "translate" the example `gdb` commands to `lldb` commands.
@@ -556,6 +590,7 @@ GPL-3 (see file [LICENSE](LICENSE))
 - [gdb documentation](https://sourceware.org/gdb/onlinedocs/gdb)
 - TODO Links to gdb tutorials + cheat sheets
   - [YoLinux.com GDB command cheat sheet](http://www.yolinux.com/TUTORIALS/GDB-Commands.html)
+  - [gdb command reference by VisualGDB](https://visualgdb.com/gdbreference/commands/)
   - [GDB to LLDB command map](https://lldb.llvm.org/use/map.html#examining-variables)
 - `gdb` does not know default arguments:
   - https://stackoverflow.com/questions/58827121/how-to-use-c-default-arguments-in-the-call-command-of-gdb?noredirect=1#comment103957145_58827121

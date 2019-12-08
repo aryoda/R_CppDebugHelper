@@ -58,6 +58,7 @@ void dbg_str(Environment e, const char *name) {
     if (varname.size() < 1)   // size in bytes (not chars)!
       return;
     RObject o = e.find(varname); // find instead of get to search parent environments too
+    // TODO dirty search in wrong environment, use the standard way: Function f("R_func_name"); + encapsulte exception handling
     Function f = e.find("str");  // should be in "namespace:utils"
     // Rcpp::print(f);
     f(o);  // does print via R
@@ -71,6 +72,7 @@ void dbg_str(Environment e, const char *name) {
 
 // Print structure of an object (like R's "str")
 void dbg_str(DataFrame df) {
+  // TODO dirty search, use the standard way: Function f("R_func_name"); + encapsulte exception handling
   Function f = Environment::global_env().find("str");  // should be in "namespace:utils"
   // Rcpp::print(f);
   f(df);  // does print via R

@@ -12,6 +12,8 @@
 //
 
 
+// TODO Rename to dbg_as_stdstring ?
+
 // This debug helper function uses this gdb behaviour to pass gdb string argument to
 // an Rcpp function to query R variables by their name...
 // https://stackoverflow.com/questions/42462860/calling-stdbasic-string-in-gdb?noredirect=1&lq=1

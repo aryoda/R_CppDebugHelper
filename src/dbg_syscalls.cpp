@@ -3,7 +3,7 @@ using namespace Rcpp;
 
 
 
-// Prints the R function call stack that lead to calling the current code
+// Prints the R function call stack that led to calling the current code
 void dbg_syscalls() {
 
   try {

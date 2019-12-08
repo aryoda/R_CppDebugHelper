@@ -6,4 +6,5 @@
 # dbg_table function uses 'auto' type specifier without trailing return type
 # https://stackoverflow.com/questions/44798728/warning-function-uses-auto-type-specifier-without-trailing-return-type
 
-CXXFLAGS = -g3 -std=c++14  # -O0 -Wall   is GCC specific an cannot be used on all platforms
+# CXXFLAGS = -g3 -std=c++14  # -O0 -Wall   is GCC specific an cannot be used on all platforms
+CXXFLAGS = -std=c++11
