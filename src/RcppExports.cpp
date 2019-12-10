@@ -5,6 +5,15 @@
 
 using namespace Rcpp;
 
+// break_to_debugger
+void break_to_debugger();
+RcppExport SEXP _CppDebugHelper_break_to_debugger() {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    break_to_debugger();
+    return R_NilValue;
+END_RCPP
+}
 // debug_example_rcpp
 List debug_example_rcpp();
 RcppExport SEXP _CppDebugHelper_debug_example_rcpp() {
@@ -17,6 +26,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_CppDebugHelper_break_to_debugger", (DL_FUNC) &_CppDebugHelper_break_to_debugger, 0},
     {"_CppDebugHelper_debug_example_rcpp", (DL_FUNC) &_CppDebugHelper_debug_example_rcpp, 0},
     {NULL, NULL, 0}
 };

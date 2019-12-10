@@ -702,3 +702,108 @@ SEXP conc( SEXP& XX_, SEXP& YY_){
     // // R_PV was not declared in this scope
     // Rcpp::Rcout << "End of debug output" << std::endl;
 
+
+
+
+Ideas to redirect R outpout from Rgui to gdb via R callback functions
+https://stackoverflow.com/questions/59236579/gdb-prints-output-stdout-to-rgui-console-instead-of-gdb-console-on-windows-whe
+https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Setting-R-callbacks
+https://opensourceforu.com/2012/02/function-pointers-and-callbacks-in-c-an-odyssey/
+> These callbacks should never be changed in a running R session (and hence cannot be called from an extension package).
+-> see the source code:
+https://github.com/wch/r-source/blob/9b732e3338ed0f618ba18d136a68ca68733de3ef/src/unix/system.txt
+https://github.com/wch/r-source/blob/9b732e3338ed0f618ba18d136a68ca68733de3ef/src/unix/system.c
+https://github.com/wch/r-source/blob/06185bd431beb9b6e0883193273d1779ef2c6a2c/src/include/Rinterface.h#L136
+https://fossies.org/dox/R-3.6.1/sys-std_8c.html
+https://stat.ethz.ch/pipermail/r-devel/2011-May/060929.html   ->   cerr and cout not working calling c++ from R
+!!! https://stackoverflow.com/questions/51242993/difference-between-r-3-4-4-and-r-3-5-1-in-r-api-for-c
+void R_WriteConsole(const char *buf, int len) {if (ptr_R_WriteConsole) ptr_R_WriteConsole(buf, len); else ptr_R_WriteConsoleEx(buf, len, 0); }
+void R_WriteConsoleEx(const char *buf, int len, int otype) {if (ptr_R_WriteConsole) ptr_R_WriteConsole(buf, len); else ptr_R_WriteConsoleEx(buf, len, otype); }
+...
+ptr_R_WriteConsole = Rstd_WriteConsole;
+...
+src/include/Rinterface.h:
+  extern void (*ptr_R_WriteConsole)(const char *, int);
+  extern void (*ptr_R_WriteConsoleEx)(const char *, int, int);
+-------
+Function: void R_WriteConsole (const char buf, int buflen)
+Function: void R_WriteConsoleEx (const char buf, int buflen, int otype)
+Function: void R_ResetConsole ()
+Function: void R_FlushConsole ()
+Function: void R_ClearErrConsole ()
+
+    These functions interact with a console.
+
+    R_ReadConsole prints the given prompt at the console and then does a fgets(3)–like operation, transferring up to buflen characters into the buffer buf. The last two bytes should be set to ‘“\n\0”’ to preserve sanity. If hist is non-zero, then the line should be added to any command history which is being maintained. The return value is 0 is no input is available and >0 otherwise.
+
+    R_WriteConsoleEx writes the given buffer to the console, otype specifies the output type (regular output or warning/error). Call to R_WriteConsole(buf, buflen) is equivalent to R_WriteConsoleEx(buf, buflen, 0). To ensure backward compatibility of the callbacks, ptr_R_WriteConsoleEx is used only if ptr_R_WriteConsole is set to NULL. To ensure that stdout() and stderr() connections point to the console, set the corresponding files to NULL via
+
+          R_Outputfile = NULL;
+          R_Consolefile = NULL;
+
+    R_ResetConsole is called when the system is reset after an error. R_FlushConsole is called to flush any pending output to the system console. R_ClearerrConsole clears any errors associated with reading from the console.
+
+otype determines whether the content is
+ *  regular output (0) or error/warning (1) and can be used by GUIs
+ *  to distinguish those.
+
+>>>>>>>> To implement a callback this may work (taken from Rgui):
+https://github.com/wch/r-source/blob/5a156a0865362bb8381dcd69ac335f5174a4f60c/src/gnuwin32/system.c
+// Global variables
+static void (*TrueWriteConsole) (const char *, int);
+static void (*TrueWriteConsoleEx) (const char *, int, int);
+void R_WriteConsole(const char *buf, int len)
+{
+    R_ProcessEvents();
+    if (TrueWriteConsole) TrueWriteConsole(buf, len);
+    else TrueWriteConsoleEx(buf, len, 0);
+}
+void R_WriteConsoleEx(const char *buf, int len, int otype)
+{
+    R_ProcessEvents();
+    if (TrueWriteConsole) TrueWriteConsole(buf, len);
+    else TrueWriteConsoleEx(buf, len, otype);
+}
+    TrueWriteConsole = Rp->WriteConsole;   // Rstart Rp
+    TrueWriteConsoleEx = Rp->WriteConsoleEx;
+// https://github.com/wch/r-source/blob/06185bd431beb9b6e0883193273d1779ef2c6a2c/src/include/R_ext/RStartup.h#L97
+structRstart:
+   blah2 WriteConsole;  // typedef void (*blah2) (const char *, int);
+   blah7 WriteConsoleEx; /* used only if WriteConsole is NULL */  // typedef void (*blah7) (const char *, int, int);
+Rp->ReadConsole = myReadConsole;
+Rp->WriteConsole = myWriteConsole;
+static void myWriteConsole(const char *buf, int len)
+{
+    printf("%s", buf);
+}
+R_SetParams(Rp);
+void R_SetWin32(Rstart Rp)  // https://github.com/wch/r-source/blob/7321904bbc57f59362c1f5ff8268f3702547e7e1/src/gnuwin32/system.c#L691
+    TrueWriteConsole = Rp->WriteConsole;
+    TrueWriteConsoleEx = Rp->WriteConsoleEx;
+
+
+Rgui > break into debugger
+
+Code see:
+https://github.com/wch/r-source/blob/5a156a0865362bb8381dcd69ac335f5174a4f60c/src/gnuwin32/rui.c
+
+void breaktodebugger(void)
+{
+    asm("int $3");
+}
+
+static Rboolean isdebuggerpresent(void)
+{
+    typedef BOOL (*R_CheckDebugger)(void);
+    R_CheckDebugger entry;
+    /* XP or later */
+    entry =
+	(R_CheckDebugger) GetProcAddress((HMODULE)GetModuleHandle("KERNEL32"),
+					 "IsDebuggerPresent");
+    if (entry == NULL) return(FALSE);
+    else return (Rboolean) entry();
+}
+
+setconsoleoptions(... int buffered...):
+consolebuffered = buffered;
+https://github.com/wch/r-source/blob/5ffefa197f4b644fd85730fc795be964726a738a/src/gnuwin32/console.c#L1971

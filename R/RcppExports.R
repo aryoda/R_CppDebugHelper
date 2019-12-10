@@ -2,6 +2,11 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #' @export
+break_to_debugger <- function() {
+    invisible(.Call('_CppDebugHelper_break_to_debugger', PACKAGE = 'CppDebugHelper'))
+}
+
+#' @export
 debug_example_rcpp <- function() {
     .Call('_CppDebugHelper_debug_example_rcpp', PACKAGE = 'CppDebugHelper')
 }

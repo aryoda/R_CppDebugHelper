@@ -1,3 +1,19 @@
+// #include <Rinternals.h>
+// #include <Rinterface.h>
+#include <Rcpp.h>
+
+using namespace Rcpp;
+
+
+// void my_WriteConsole(const char *buf, int len) {
+//   // NOP
+// }
+//
+// // "register" call-back function
+// ptr_R_WriteConsole = &my_WriteConsole;
+
+
+
 // #include <Rcpp.h>
 // using namespace Rcpp;
 //
