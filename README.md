@@ -42,7 +42,7 @@ TODO
 
 Functional requirements:
 
-1. Inspect variable values of `R` and `Rcpp` variables during debugging
+1. Inspect variable values and structures of `R` and `Rcpp` variables during debugging
 
 1. Debugging support for C++ code
 
@@ -140,7 +140,7 @@ devtools::install_github("aryoda/CppDebugHelper")
      and add (or edit) the line `CXXFLAGS = -g3 -O0 -Wall` (for Linux only).
      For Windows you have to add `CXXFLAGS = -g3 -std=c++11`. Save the file.
      
-     **Don't forget to remove or comment line later or you may slow down your R or newly installed packages!**
+     **Don't forget to remove or comment the line later or you may slow down your R or newly installed packages!**
 
    - Clean and build your package (or C/C++ libary)
 
