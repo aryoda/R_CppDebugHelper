@@ -2,5 +2,6 @@
 
 export(break_to_debugger)
 export(debug_example_rcpp)
+export(internal_break_to_debugger)
 importFrom(Rcpp,sourceCpp)
 useDynLib(CppDebugHelper)

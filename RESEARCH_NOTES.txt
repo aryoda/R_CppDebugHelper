@@ -807,3 +807,22 @@ static Rboolean isdebuggerpresent(void)
 setconsoleoptions(... int buffered...):
 consolebuffered = buffered;
 https://github.com/wch/r-source/blob/5ffefa197f4b644fd85730fc795be964726a738a/src/gnuwin32/console.c#L1971
+
+
+
+Rterm on Windows does support breakpoints and print gdb and R output to the same console!
+But: It may be deprecated:
+https://stackoverflow.com/questions/3412911/r-exe-rcmd-exe-rscript-exe-and-rterm-exe-whats-the-difference
+
+
+Readme.rterm:
+https://github.com/wch/r-source/blob/06185bd431beb9b6e0883193273d1779ef2c6a2c/src/gnuwin32/README.Rterm
+Its purpose is to provide something similar to the main Unix interface
+for R, including a batch capability.  The command-line arguments are
+the same as those for RGui.exe and are documented in `An Introduction
+to R' in the section `Invoking R under Windows' (--mdi and --sdi are
+accepted but do nothing).  Batch use is covered in the rw-FAQ Q2.10.
+In interactive use the interpreter can be interrupted by Ctrl-C or
+Ctrl-Break.
+...
+
