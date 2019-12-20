@@ -54,7 +54,7 @@ Functional requirements:
 
 Non-functional requirements:
 
-1. Support for at least `gdb` and optionally the `LLDB` debugger
+1. No need to [recompile R with debugging information](https://cran.r-project.org/bin/windows/base/rw-FAQ.html#How-do-I-debug-code-that-I-have-compiled-and-dyn_002eload_002ded_003f) (unless you want to debug R)
 
 1. Minimize preparation efforts for debugging
 
@@ -67,6 +67,9 @@ Non-functional requirements:
     - short function names
     - overloaded debugging helper functions to let `gdb` decide which function to call instead
       of forcing the user to find the right function name by knowing the data type
+
+1. Support for at least `gdb` and optionally the `LLDB` debugger
+
 
 
 

@@ -46,9 +46,9 @@ To be able to debug C/C++ code contained in a package you have to install
 
 | Software                                                                     | Required for                                                                                                                                                                                  |
 |------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| R for Windows                                                                | Windows binaries for the R base distribution                                                                                                                                                  |
-| Rtools                                                                       | Contains the `gdb` debugger and C/C++ compiler (required to compile the C/C++ code with debugging symbols)                                                                                    |
-| (R source code)                                                              | Optional: If you want to debug R itself or set breakpoints into R functions by name you have to recompile R on Windows (not recommended - takes a lot of time for setup and solving problems) |
+| [R for Windows](https://cran.r-project.org/bin/windows/)                                                                | Windows binaries for the R base distribution                                                                                                                                                  |
+| [Rtools](https://cran.r-project.org/bin/windows/Rtools/)                                                                       | Contains the `gdb` debugger and C/C++ compiler (required to compile the C/C++ code with debugging symbols)                                                                                    |
+| [(R source code)](https://cran.r-project.org/)                                                              | Optional: If you want to debug R itself or set breakpoints into R functions by name you have to recompile R on Windows (not recommended - takes a lot of time for setup and solving problems) |
 | ([RStudio Desktop](https://rstudio.com/products/rstudio/download/#download)) | Optional (but recommended for easier dev workflows): Used as IDE for R and C/C++ code, building packages. The debugger `gdb` can be run directly in the RStudio console                       |
 
 You can find the downloads at the [official web site of R](https://cran.r-project.org/).
@@ -161,6 +161,12 @@ Make sure the created code contains debugging symbols by checking the `Build` ta
 
 
 # TODO Options and step-by-step instructions...
+
+Table:
+
+RGui     gdb RGui.exe   no Ctrl + C (but menu item)   separate output for R and gdb
+RScript  gdb RScript    no Ctrl + c (but CC works)    same output terminal for R and gdb
+R        gdb --pid=123  Ctrl + c works (CC too)       separate output for R and gdb
 
 
 
