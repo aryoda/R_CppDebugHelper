@@ -61,6 +61,7 @@ In Windows go to the *Control Panel > Edit environment variables for your accoun
 R and Rtools are added at least to the search path so that you can work in the Windows console easily:
 
 ![path settings in the user environment variable](R_Rtools_path_settings_win10.png)
+![path settings in the user environment variable](Edit_env_vars.png)
 
 You can also see the path settings in R via `Sys.getenv("PATH")`.
 
@@ -151,7 +152,9 @@ The build must succeed.
 
 Make sure the created code contains debugging symbols by checking the `Build` tab in RStudio:
 
-- All `g++` command must contain the `-g -O2` switch (and no other `-g*` or `-O*` switches after (right from)
+![RStudio build output: Successful but with wrong switches](package_building_linker_strips_debug_symbols.png)
+
+- All `g++` command must contain the `-g -O2` switch (and no other `-g*` or `-O*` switches after (right-hand side)
   these switches (since the last switch is the winner ;-)
   
 - The call to the linker (one of the last lines) does **NOT** contain a `-s` switch since this would filter out ("strip")
@@ -160,13 +163,34 @@ Make sure the created code contains debugging symbols by checking the `Build` ta
 
 
 
-# TODO Options and step-by-step instructions...
+# Overview over debugging options
 
-Table:
+You basically have three options to debug C/Cpp code in R on Windows.
 
-RGui     gdb RGui.exe   no Ctrl + C (but menu item)   separate output for R and gdb
-RScript  gdb RScript    no Ctrl + c (but CC works)    same output terminal for R and gdb
-R        gdb --pid=123  Ctrl + c works (CC too)       separate output for R and gdb
+Each option has different advantages and disadvantages regarding
+
+- how easy it is to start debugging
+- how easy it is to break into the debugger
+- the output of gdb and R (same vs. separate windows): 
+
+| R console | Command line  | break to debugger*                                                | Output                                                  | Notes                                                                                                                                                                           |
+|-----------|---------------|---------------------------------------------------------------------|---------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| RGui      | `gdb RGui.exe`  | no Ctrl + c (but menu item for software breakpoint in *Misc*)       | separate output for R and gdb (2 different windows)     | Turn off buffering in *Misc* menu to avoid [delayed output to Rconsole](https://cran.r-project.org/bin/windows/base/rw-FAQ.html#The-output-to-the-console-seems-to-be-delayed) |
+| RScript   | `gdb RScript`   | no Ctrl + c (but software breakpoint with opcode 0xCC works)        | same output terminal for R and gdb (same terminal)      |                                                                                                                                                                                 |
+| R         | `gdb --pid=123` | Ctrl + c works (and software breakpoint with opcode 0xCC works too) | separate output for R and gdb (two different terminals) | Use `Sys.getpid()` in R to the the PID                                                                                                                                          |
+
+*) On x86 (32 bit) and amd64/x86_64 (64 bit) architectures a software breakpoint to an attached debugger can be triggered
+by the machine opcode `0xCC` (INT 3) which calls the interrupt 3 (signal "SIGINT").
+
+
+
+# TODO Explain each option with step-by-step instructions...
+
+## Debugging with RGui
+
+## Debugging with RScript
+
+## Debugging with R
 
 
 

@@ -13,7 +13,7 @@ int internal_break_to_debugger()
   // the surrounding code is just for testing purposes (eg. if the compiler optimizes away some parts)
 
   // "int 3" is the assembly instruction to create a breakpoint = get the 0xCC single-byte opcode:
-  int a = 3;
+  int a = 3;  // just an arbitrary number
   asm("int $3");
   // std::raise(SIGINT);
   // std::raise(SIGTRAP); trap is no symbol -> only for POSIX
@@ -21,7 +21,7 @@ int internal_break_to_debugger()
   // std::abort() // part of the standard C++ library and is cross-platform but raises SIGABRT which is probably not working on Windows
   // raise(SIGTRAP); // error: 'SIGTRAP' was not declared in this scope
   // __builtin_trap(); // GCC builtin: http://gcc.gnu.org/onlinedocs/gcc-4.3.2/gcc/Other-Builtins.html#index-g_t_005f_005fbuiltin_005ftrap-2760
-  a++;
+  a++;      // work-around to provide code after the breakpoint to avoid SEGFAULTS when looking for the next code/statement to execute
   return a;
 
   // See also:

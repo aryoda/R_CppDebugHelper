@@ -54,12 +54,12 @@ Functional requirements:
 
 Non-functional requirements:
 
-1. No need to [recompile R with debugging information](https://cran.r-project.org/bin/windows/base/rw-FAQ.html#How-do-I-debug-code-that-I-have-compiled-and-dyn_002eload_002ded_003f) (unless you want to debug R)
+1. No need to [recompile R on Windows for debugging](https://cran.r-project.org/bin/windows/base/rw-FAQ.html#How-do-I-debug-code-that-I-have-compiled-and-dyn_002eload_002ded_003f) (unless you want to debug R itself)
 
 1. Minimize preparation efforts for debugging
 
-    - no need to add extra C/C++ code to be compiled (eg. no `main.cpp` with `Rinside` required)
-    - no need to modify C/C++ code
+    - no need to add extra C/C++ code (eg. `main.cpp` with `Rinside`)
+    - no need to modify existing C/C++ code
 
 1. Easy-to-use debugging helper functions
 
