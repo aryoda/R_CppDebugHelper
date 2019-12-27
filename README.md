@@ -121,7 +121,7 @@ The last column (`...`) contains names of functions specialized for the data typ
 | DatetimeVector   |              | x                      |  x                  |  x               | x                        |               | x                      |     |
 | ... Matrices...  |              |                        |                     |                  |                          |               |                        |     |
 
-*Note: This table was initally created using http://www.tablesgenerator.com/markdown_tables*
+*Note: This table was initially created using http://www.tablesgenerator.com/markdown_tables*
 
 
 

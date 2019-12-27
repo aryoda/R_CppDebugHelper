@@ -2,7 +2,7 @@
 using namespace Rcpp;
 
 
-
+// See: http://x86asm.net/articles/debugging-in-amd64-64-bit-mode-in-theory/index.html#Software-Breakpoints
 // [[Rcpp::export]]
 int internal_break_to_debugger()
 {

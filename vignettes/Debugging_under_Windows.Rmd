@@ -4,7 +4,7 @@ author: "Jürgen Altfeld"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Debugging C/C++ code in R under Windows}
+  %\VignetteIndexEntry{TODO - set vignette index entry}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -179,10 +179,23 @@ Each option has different advantages and disadvantages regarding
 | RScript   | `gdb RScript`   | no Ctrl + c (but software breakpoint with opcode 0xCC works)        | same output terminal for R and gdb (same terminal)      |                                                                                                                                                                                 |
 | R         | `gdb --pid=123` | Ctrl + c works (and software breakpoint with opcode 0xCC works too) | separate output for R and gdb (two different terminals) | Use `Sys.getpid()` in R to the the PID                                                                                                                                          |
 
-*) On x86 (32 bit) and amd64/x86_64 (64 bit) architectures a software breakpoint to an attached debugger can be triggered
-by the machine opcode `0xCC` (INT 3) which calls the interrupt 3 (signal "SIGINT").
+*) On x86 (32 bit) and amd64/x86_64 (64 bit) architectures a [software breakpoint](http://x86asm.net/articles/debugging-in-amd64-64-bit-mode-in-theory/index.html#Software-Breakpoints)
+can be triggered by the machine opcode `0xCC` (INT 3) which calls the interrupt 3 (signal `SIGINT`).
 
+`SIGINT` is the interrupt signal usually sent to a foreground process by pressing Ctrl + C.
 
+*Note: This table was initially created using http://www.tablesgenerator.com/markdown_tables*
+
+Transposed (+ required windows + "use misc > break to debugger instead")
+
+|                    | RGui                                                                                                                                                                           | RScript                                                      | R                                                                   |
+|--------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------|---------------------------------------------------------------------|
+| Command line       | `gdb RGui.exe`                                                                                                                                                                 | `gdb RScript`                                                | `gdb --pid=123`                                                     |
+| break to debugger* | no Ctrl + c<br>(but menu item for<br>software breakpoint in *Misc*)                                                                                                                  | no Ctrl + c (but software breakpoint with opcode 0xCC works) | Ctrl + c works (and software breakpoint with opcode 0xCC works too) |
+| Output             | separate output for R and gdb<br>(2 different windows)                                                                                                                            | same output terminal for R and gdb (same terminal)           | separate output for R and gdb (two different terminals)             |
+| Notes              | Turn off buffering in *Misc* menu<br>to avoid [delayed output to Rconsole](https://cran.r-project.org/bin/windows/base/rw-FAQ.html#The-output-to-the-console-seems-to-be-delayed) |                                                              | Use `Sys.getpid()` in R to the the PID                              |
+
+: test headline
 
 # TODO Explain each option with step-by-step instructions...
 

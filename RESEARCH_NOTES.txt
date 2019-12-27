@@ -814,6 +814,34 @@ Rterm on Windows does support breakpoints and print gdb and R output to the same
 But: It may be deprecated:
 https://stackoverflow.com/questions/3412911/r-exe-rcmd-exe-rscript-exe-and-rterm-exe-whats-the-difference
 
+Background why Ctrl+C works in Rterm (to break into debugger):
+R.c:main:58 calls rcmdfn which calls stdlib.h:system() in rcmdfn.c:500 with cmd = "Rterm..."
+rcmdfn.c:178 says: /* R.exe should ignore Ctrl-C, and let Rterm.exe handle it */
+and calls:
+SetConsoleCtrlHandler(NULL, TRUE); // included in Rfe.c:21 via windows.h
+-> https://docs.microsoft.com/en-us/windows/console/setconsolectrlhandler
+> Each console process has its own list of application-defined HandlerRoutine functions that handle CTRL+C and CTRL+BREAK signals.
+< (...) The SetConsoleMode function can disable the ENABLE_PROCESSED_INPUT mode for a console's input buffer,
+>       so CTRL+C is reported as keyboard input rather than as a signal. (...)
+>       # https://docs.microsoft.com/en-us/windows/console/setconsolemode
+> Calling SetConsoleCtrlHandler with the NULL and TRUE arguments causes the calling process to ignore CTRL+C signals.
+> This attribute is inherited by child processes, but it can be enabled or disabled by any process without affecting existing processes.
+> (...) If a console process is being debugged and CTRL+C signals have not been disabled, the system generates a DBG_CONTROL_C exception.
+> This exception is raised only for the benefit of the debugger, and an application should never use an exception handler to deal with it.
+> If the debugger handles the exception, an application will not notice the CTRL+C, with one exception: alertable waits will terminate.
+> If the debugger passes the exception on unhandled, CTRL+C is passed to the console process and treated as a signal, as previously discussed.
+> A console process can use the GenerateConsoleCtrlEvent function to send a CTRL+C or CTRL+BREAK signal to a console process group.
+> # https://docs.microsoft.com/en-us/windows/console/generateconsolectrlevent
+psignal.c:hwIntrHandler:135: Hardware interrupt handler for CTLR_C...
+          case CTRL_C_EVENT :
+          case CTRL_BREAK_EVENT :
+              raise(SIGBREAK);
+psignal.c:downhill_Signal_Init:165 sets the Hardware interrupt handler !!! Called by:
+psignal.c:sigaction:190 -> called by?
+psignal.c:signal:237 -> called in rterm.c:AppMain:126 -> signal(SIGBREAK, my_onintr); // to set the UserBreak = 1
+psignal.c:sigpending:312
+psignal.c:sigprocmask:337
+
 
 Readme.rterm:
 https://github.com/wch/r-source/blob/06185bd431beb9b6e0883193273d1779ef2c6a2c/src/gnuwin32/README.Rterm
@@ -892,3 +920,66 @@ static RETSIGTYPE handleInterrupt(int dummy)
     R_interrupts_pending = 1;
     signal(SIGINT, handleInterrupt);
 }
+
+
+
+Fetch R-devel source code:
+https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Getting-and-unpacking-the-sources
+https://cran.r-project.org/bin/windows/Rtools/
+svn checkout https://svn.R-project.org/R/trunk <target sub folder>
+
+-> see file "INSTALL" in the root folder for a how-to-build description
+
+The Subversion repository does not contain the current sources for the recommended packages,
+which can be obtained by rsync or downloaded from CRAN. To use rsync to install the appropriate sources for the recommended packages,
+run ./tools/rsync-recommended from the top-level directory of the R sources.
+
+You can use a separate build directory to separate source from build files:
+https://bookdown.org/lionel/contributing/building-r.html#sec:build
+# mkdir build
+# cd build
+# ../tools/rsync-recommended
+# ../configure
+# make
+
+# Show all supported config options:
+./configure --help
+
+./configure:
+configure: error: Some of the recommended packages are missing
+  Use --without-recommended-packages if this was intentional
+
+Solution:
+cd tools
+./rsync-recommended
+cd ..
+./configure
+# or simply: make rsync-recommended
+
+
+TODO:
+make clean
+make
+# R with debugging information: https://cran.r-project.org/bin/windows/base/rw-FAQ.html#How-do-I-debug-code-that-I-have-compiled-and-dyn_002eload_002ded_003f
+# make DEBUG=T  # do a make clean first since a recompile is avoid by make if files are unchanged
+# make all recommended vignettes
+# make manuals
+make check
+make check-recommended
+make check-devel
+make check-all
+-> see file tests/README
+-> fails are written to .Rout.fail file in the folder being checked
+
+? (set ‘CFLAGS’ etc in config.site before configuring, or edit files Makeconf and etc/Makeconf between running configure and make)
+
+Qt Creator generic project for R:
+https://doc.qt.io/qtcreator/creator-project-generic.html#importing-a-generic-project
+https://shinnok.com/rants/2011/07/18/using-the-qt-creator-ide-with-non-qt-projects/
+- Import existing project
+- add all project files to .files file (initially done by Qt Creator). Manual update:
+  git ls-files "*.cpp" "*.h" > MyProject.files
+
+
+Markdown extensions:
+https://rapporter.github.io/pander/
