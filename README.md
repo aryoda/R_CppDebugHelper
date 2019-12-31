@@ -54,7 +54,7 @@ Functional requirements:
 
 Non-functional requirements:
 
-1. No need to [recompile R on Windows for debugging](https://cran.r-project.org/bin/windows/base/rw-FAQ.html#How-do-I-debug-code-that-I-have-compiled-and-dyn_002eload_002ded_003f) (unless you want to debug R itself)
+1. No need to [recompile R on Windows for debugging](https://cran.r-project.org/bin/windows/base/rw-FAQ.html#How-do-I-debug-code-that-I-have-compiled-and-dyn_002eload_002ded_003f) (unless you want to debug R itself and are resistent against *build headaches* ;-)
 
 1. Minimize preparation efforts for debugging
 
@@ -139,7 +139,7 @@ devtools::install_github("aryoda/CppDebugHelper")
 
 1. Build your package or C/C++ library called from R with debugging information
 
-   - For R packages modify the `Makevars` file via `usethis::usethis::edit_r_makevars()`
+   - For R packages modify the `Makevars` file via `usethis::edit_r_makevars()`
      and add (or edit) the line `CXXFLAGS = -g3 -O0 -Wall` (for Linux only).
      For Windows you have to add `CXXFLAGS = -g3 -std=c++11`. Save the file.
      
@@ -568,7 +568,7 @@ Then clean-up the binaries of your code and recompile (*Build > Clean & Rebuild*
 
 `lldb` is the default debugger in Xcode on macOS/OS X for C++ and typically used with the `Clang` compiler.
 
-All examples here are based on `gdb` but it should (= not yet tested!) be possible to use `llvm` instead of `gdb`
+All examples here are based on `gdb` but it should (= not yet tested!) be possible to use `lldb` instead of `gdb`
 because this packages does not depend on any special debugger.
 
 You can use this [GDB to LLDB command map](https://lldb.llvm.org/use/map.html) to "translate" the example `gdb` commands to `lldb` commands.

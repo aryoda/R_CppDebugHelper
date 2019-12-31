@@ -983,3 +983,44 @@ https://shinnok.com/rants/2011/07/18/using-the-qt-creator-ide-with-non-qt-projec
 
 Markdown extensions:
 https://rapporter.github.io/pander/
+
+
+OS X
+User Makevars file is in home/.R
+Makeconf is in /Library/Frameworks/R.framework/Versions/3.3/Resources/etc
+# etc/Makeconf.  Generated from Makeconf.in by configure.
+# CFLAGS = -Wall -mtune=core2 -g -O2 $(LTO)
+CFLAGS = -Wall -mtune=core2 -g -O0 $(LTO)
+# CXXFLAGS = -Wall -mtune=core2 -g -O2 $(LTO)
+CXXFLAGS = -Wall -mtune=core2 -g -O0 $(LTO)
+# CXX1XFLAGS = -Wall -mtune=core2 -g -O2
+CXX1XFLAGS = -Wall -mtune=core2 -g -O0
+
+
+
+
+lldb usage:
+https://lldb.llvm.org/use/tutorial.html
+
+A process, by default, will share the lldb terminal with the inferior process.
+When in this mode, much like when debugging with gdb, when the process is running anything you type will go to the STDIN of the inferior process.
+
+To interrupt your inferior program, type CTRL+C.
+
+Questions:
+
+(lldb) frame variable  # says
+(Rcpp::NumericVector) nv = <no location, value may have been optimized out>
+# why? -O0 makes no diff to -O2! -fPIC  or  -mtune=core2?
+# PIC = position independent code (eg. only relative jumps)
+# clang++ -std=c++11 -dynamiclib -Wl,-headerpad_max_install_names -undefined dynamic_lookup -single_module -multiply_defined suppress -L/Library/Frameworks/R.framework/Resources/lib -L/usr/local/lib -o CppDebugHelper.so R_and_Rcpp_data_types_doc.o RcppExports.o _playground_.o break_to_debugger.o dbg_attributes.o dbg_get.o dbg_ls.o dbg_print.o dbg_str.o dbg_subset.o dbg_syscalls.o dbg_table.o debug_example_rcpp.o utils.o -F/Library/Frameworks/R.framework/.. -framework R -Wl,-framework -Wl,CoreFoundation
+
+Intellisense for and calls of dbg_* functions do not work. Why?
+(lldb) call dbg_print(nv)
+error: Couldn't lookup symbols:
+  __Z9dbg_printN4Rcpp6VectorILi14ET_EE
+# call dbg_ls() does work! Also:
+# call dbg_print("a")
+# call dbg_print(nv->data)
+
+
